@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  phoneNumber String    @unique
+  name        String
+  verified    Boolean   @default(false)
+  bookings    Booking[]
+  payments    Payment[]
+}
+
+model Admin {
+  id          String  @id @default(uuid())
+  phoneNumber String  @unique
+  name        String
+  verified    Boolean @default(false)
+  events      Event[]
+}
+
+model Event {
+  id             String    @id @default(uuid())
+  name           String
+  startTime      DateTime
+  endTime        DateTime
+  venue          String
+  location       String
+  bookings       Booking[]
+  payments       Payment[]
+  seats          Seat[]
+  description    String
+  bannerImageUrl String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  adminId        String
+  admin          Admin     @relation(fields: [adminId], references: [id])
+}
+
+model Seat {
+  id         String      @id @default(uuid())
+  price      Int
+  type       SeatType
+  seatNumber String
+  eventId    String
+  event      Event       @relation(fields: [eventId], references: [id])
+  bookedSeat BookedSeat?
+}
+
+model BookedSeat {
+  id        String  @id @default(uuid())
+  seatId    String
+  seat      Seat    @relation(fields: [seatId], references: [id])
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  @@unique([seatId])
+}
+
+model Booking {
+  id          String       @id @default(uuid())
+  eventId     String
+  bookedSeats BookedSeat[]
+  event       Event        @relation(fields: [eventId], references: [id])
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  payment     Payment?
+}
+
+model Payment {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  bookingId String
+  booking   Booking       @relation(fields: [bookingId], references: [id])
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  status    PaymentStatus @default(PENDING)
+  event     Event?        @relation(fields: [eventId], references: [id])
+  eventId   String?
+
+  @@unique([bookingId])
+}
+
+enum PaymentStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+enum SeatType {
+  REGULAR
+  PREMIUM
+  RECLINER
+  VIP
+  COUPLE
+  BALCONY
+  SOFA
+  LUXURY
+}
