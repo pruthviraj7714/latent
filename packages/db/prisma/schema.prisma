@@ -36,7 +36,8 @@ model Event {
   startTime      DateTime
   endTime        DateTime
   venue          String
-  location       String
+  cityId         String
+  city           City      @relation(fields: [cityId], references: [id])
   bookings       Booking[]
   payments       Payment[]
   seats          Seat[]
@@ -91,6 +92,14 @@ model Payment {
   eventId   String?
 
   @@unique([bookingId])
+}
+
+model City {
+  id      String  @id @default(uuid())
+  name    String  @unique
+  state   String
+  country String  @default("India")
+  events  Event[]
 }
 
 enum PaymentStatus {
