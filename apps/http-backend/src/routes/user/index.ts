@@ -2,7 +2,8 @@ import { Request, Response, Router } from "express";
 import { prisma } from "@repo/db/client";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
-import { sendMessage } from "../utils/twilio";
+import { sendMessage } from "../../utils/twilio";
+import { USER_JWT_SECRET } from "../../config";
 
 const userRouter: Router = Router();
 
@@ -99,7 +100,7 @@ userRouter.post(
 
       const token = jwt.sign(
         { id: user.id, phoneNumber: user.phoneNumber },
-        process.env.JWT_SECRET!
+        USER_JWT_SECRET!
       );
 
       res.status(200).json({
@@ -214,7 +215,7 @@ userRouter.post(
 
       const token = jwt.sign(
         { id: user.id, phoneNumber: user.phoneNumber },
-        process.env.JWT_SECRET!
+        USER_JWT_SECRET!
       );
 
       res.status(200).json({
