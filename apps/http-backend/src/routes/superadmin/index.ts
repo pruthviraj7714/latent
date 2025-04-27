@@ -131,6 +131,52 @@ superAdminRouter.post(
   }
 );
 
+superAdminRouter.post(
+  "/add-city",
+  adminMiddleware,
+  async (req: AdminAuthenticatedRequest, res: Response) => {
+    try {
+      const { name, state } = req.body;
+
+      if (!name || !state) {
+        res.status(400).json({
+          message: "Invalid Inputs",
+        });
+      }
+
+      const isCityAlreadyExists = await prisma.city.findFirst({
+        where: {
+          OR: [{ name }, { state }],
+        },
+      });
+
+      if (isCityAlreadyExists) {
+        res.status(400).json({
+          message: "City Already Exists",
+        });
+        return;
+      }
+
+      await prisma.city.create({
+        data: {
+          name,
+          state,
+        },
+      });
+
+      res.status(201).json({
+        message: "City Successfully Added",
+      });
+    } catch (error) {
+      console.error("Verification error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
 superAdminRouter.get(
   "/events",
   adminMiddleware,
@@ -152,23 +198,42 @@ superAdminRouter.get(
 );
 
 superAdminRouter.put(
-  "event/metadata/:eventId",
+  "/:eventId",
   adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response) => {
+  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
     try {
+      const parsedBody = updateEventSchema.safeParse(req.body);
+      const adminId = req.admin?.id!;
       const eventId = req.params.eventId;
+
       if (!eventId) {
-        res.status(400).json({
-          message: "Event Id is missing",
-        });
+        res.status(400).json({ message: "Event Id is missing" });
+        return;
       }
-
-      const { data, success, error } = updateEventSchema.safeParse(req.body);
-
-      if (!success) {
+      if (!parsedBody.success) {
         res.status(400).json({
           message: "Invalid Inputs",
-          error: error.format(),
+          error: parsedBody.error.format(),
+        });
+        return;
+      }
+
+      const event = await prisma.event.findUnique({
+        where: {
+          id: eventId,
+        },
+      });
+
+      if (!event) {
+        res.status(400).json({
+          message: "No Event found!",
+        });
+        return;
+      }
+
+      if (new Date() >= event.startTime) {
+        res.status(403).json({
+          message: "Event cannot be modified right now",
         });
         return;
       }
@@ -176,35 +241,57 @@ superAdminRouter.put(
       const {
         bannerImageUrl,
         description,
+        cityId,
         endTime,
-        location,
         name,
         startTime,
         venue,
         seats,
-      } = data;
+      } = parsedBody.data;
 
-      await prisma.event.update({
-        where: {
-          id: eventId,
-        },
-        data: {
-          bannerImageUrl,
-          description,
-          endTime,
-          location,
-          name,
-          seats,
-          venue,
-          startTime,
-        },
+      const txn = await prisma.$transaction(async (tx) => {
+        const event = await tx.event.update({
+          where: {
+            id: eventId,
+          },
+          data: {
+            bannerImageUrl,
+            description,
+            cityId,
+            endTime,
+            name,
+            startTime,
+            venue,
+            adminId,
+          },
+        });
+
+        await tx.seat.deleteMany({
+          where: {
+            eventId: eventId,
+          },
+        });
+
+        if (seats && seats.length > 0) {
+          await tx.seat.createMany({
+            data: seats.map((s) => ({
+              seatNumber: s.seatNumber,
+              price: s.price,
+              type: s.type,
+              eventId: event.id,
+            })),
+          });
+        }
+
+        return event;
       });
 
       res.status(200).json({
-        message: "Event Successfully Updated",
+        message: "Event Successfully updated",
+        eventId: txn.id,
       });
     } catch (error) {
-      console.error("Verification error:", error);
+      console.error("Error while updating event:", error);
       res.status(500).json({
         success: false,
         message: "Internal Server Error",
