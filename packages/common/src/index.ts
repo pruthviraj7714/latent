@@ -13,6 +13,7 @@ export const seatSchema = z.object({
     "LUXURY",
   ]),
   seatNumber: z.string(),
+  id: z.string().optional(),
 });
 
 export const createEventSchema = z.object({
@@ -73,9 +74,30 @@ export const RazorpayWebhookSchema = z.object({
         fee: z.number(),
         tax: z.number(),
         created_at: z.number(),
-      })
-    })
+      }),
+    }),
   }),
   created_at: z.number(),
-  webHookSecret: z.string()
+  webHookSecret: z.string(),
+});
+
+export const TicketBookingSchema = z.object({
+  seats: z.array(
+    z.object({
+      price: z.number(),
+      type: z.enum([
+        "REGULAR",
+        "PREMIUM",
+        "RECLINER",
+        "VIP",
+        "COUPLE",
+        "BALCONY",
+        "SOFA",
+        "LUXURY",
+      ]),
+      seatNumber: z.string(),
+      id: z.string()
+    })
+  ),
+  eventId: z.string(),
 });
