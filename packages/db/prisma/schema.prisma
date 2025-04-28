@@ -50,13 +50,14 @@ model Event {
 }
 
 model Seat {
-  id         String      @id @default(uuid())
-  price      Int
-  type       SeatType
-  seatNumber String
-  eventId    String
-  event      Event       @relation(fields: [eventId], references: [id])
-  bookedSeat BookedSeat?
+  id          String      @id @default(uuid())
+  price       Int
+  type        SeatType
+  seatNumber  String
+  lockedUntil DateTime?
+  eventId     String
+  event       Event       @relation(fields: [eventId], references: [id])
+  bookedSeat  BookedSeat?
 }
 
 model BookedSeat {
@@ -74,7 +75,7 @@ model Booking {
   eventId     String
   bookedSeats BookedSeat[]
   event       Event         @relation(fields: [eventId], references: [id])
-  status      BookingStatus
+  status      BookingStatus @default(PENDING)
   userId      String
   user        User          @relation(fields: [userId], references: [id])
   payment     Payment?
