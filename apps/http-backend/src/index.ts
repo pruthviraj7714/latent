@@ -7,6 +7,8 @@ import adminEventRouter from "./routes/admin/event";
 import superAdminRouter from "./routes/superadmin";
 import paymentRouter from "./routes/payment";
 import bookingRouter from "./routes/booking";
+import eventRouter from "./routes/user/event";
+import cityRouter from "./routes/user/cities";
 config();
 
 const app = express();
@@ -17,9 +19,11 @@ app.use(express.json());
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/admin/event", adminEventRouter);
+app.use("/api/v1/events", eventRouter);
+app.use("/api/v1/cities", cityRouter);
 app.use("/api/v1/superadmin", superAdminRouter);
-app.use("/api/v1/razorpay/", paymentRouter);
-app.use("/api/v1/booking/", bookingRouter);
+app.use("/api/v1/razorpay", paymentRouter);
+app.use("/api/v1/booking", bookingRouter);
 
 app.listen(8080, () => {
   console.log("Server is listening on PORT 8080");
