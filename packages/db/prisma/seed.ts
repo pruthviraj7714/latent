@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -35,10 +35,13 @@ async function main() {
   const event1 = await prisma.event.create({
     data: {
       name: "Music Fest 2025",
-      startTime: new Date('2025-06-01T18:00:00Z'),
-      endTime: new Date('2025-06-01T23:00:00Z'),
+      startTime: new Date("2025-06-01T18:00:00Z"),
+      endTime: new Date("2025-06-01T23:00:00Z"),
       venue: "Stadium Arena",
+      category: "MUSIC",
       cityId: mumbai.id,
+      isFeatured: true,
+      views: 45,
       description: "A grand music festival featuring top artists.",
       bannerImageUrl: "https://example.com/banner1.jpg",
       adminId: admin1.id,
@@ -48,11 +51,15 @@ async function main() {
   const event2 = await prisma.event.create({
     data: {
       name: "Tech Conference 2025",
-      startTime: new Date('2025-07-15T09:00:00Z'),
-      endTime: new Date('2025-07-15T17:00:00Z'),
+      startTime: new Date("2025-07-15T09:00:00Z"),
+      endTime: new Date("2025-07-15T17:00:00Z"),
       venue: "Tech Park Convention Center",
+      category: "TECH",
       cityId: delhi.id,
-      description: "India's largest tech conference with keynotes, talks, and networking.",
+      isPremiere: true,
+      views: 435,
+      description:
+        "India's largest tech conference with keynotes, talks, and networking.",
       bannerImageUrl: "https://example.com/banner2.jpg",
       adminId: admin2.id,
     },
@@ -104,7 +111,7 @@ async function main() {
     ],
   });
 
-  console.log('✅ Seed completed');
+  console.log("✅ Seed completed");
 }
 
 main()

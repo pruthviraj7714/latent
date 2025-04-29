@@ -31,22 +31,26 @@ model Admin {
 }
 
 model Event {
-  id             String    @id @default(uuid())
+  id             String        @id @default(uuid())
   name           String
   startTime      DateTime
   endTime        DateTime
   venue          String
   cityId         String
-  city           City      @relation(fields: [cityId], references: [id])
+  category       EventCategory
+  city           City          @relation(fields: [cityId], references: [id])
   bookings       Booking[]
   payments       Payment[]
   seats          Seat[]
+  isFeatured     Boolean       @default(false)
+  isPremiere     Boolean       @default(false)
+  views          Int           @default(0)
   description    String
   bannerImageUrl String
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   adminId        String
-  admin          Admin     @relation(fields: [adminId], references: [id])
+  admin          Admin         @relation(fields: [adminId], references: [id])
 }
 
 model Seat {
@@ -114,6 +118,7 @@ enum BookingStatus {
   SUCCESS
   FAILED
   PENDING
+  EXPIRED
 }
 
 enum SeatType {
@@ -125,4 +130,14 @@ enum SeatType {
   BALCONY
   SOFA
   LUXURY
+}
+
+enum EventCategory {
+  MUSIC
+  SPORTS
+  COMEDY
+  TECH
+  EDUCATION
+  WORKSHOP
+  PREMIERE
 }
