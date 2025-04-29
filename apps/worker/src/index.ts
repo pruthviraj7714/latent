@@ -84,7 +84,7 @@ async function clearUnProcessedBookings() {
         await tx.booking.update({
           where: { id: booking.id },
           data: {
-            status: "FAILED",
+            status: "EXPIRED",
           },
         });
       });
