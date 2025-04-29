@@ -37,6 +37,7 @@ adminEventRouter.post(
         startTime,
         venue,
         seats,
+        category
       } = parsedBody.data;
 
       const txn = await prisma.$transaction(async (tx) => {
@@ -50,6 +51,7 @@ adminEventRouter.post(
             startTime,
             venue,
             adminId,
+            category
           },
         });
         await tx.seat.createMany({
