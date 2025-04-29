@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { datetimeRegex, z } from "zod";
 
 export const seatSchema = z.object({
   price: z.number(),
@@ -13,7 +13,6 @@ export const seatSchema = z.object({
     "LUXURY",
   ]),
   seatNumber: z.string(),
-  id: z.string().optional(),
 });
 
 export const createEventSchema = z.object({
@@ -25,6 +24,15 @@ export const createEventSchema = z.object({
   description: z.string(),
   bannerImageUrl: z.string(),
   seats: z.array(seatSchema),
+  category: z.enum([
+    "MUSIC",
+    "SPORTS",
+    "COMEDY",
+    "TECH",
+    "EDUCATION",
+    "WORKSHOP",
+    "PREMIERE",
+  ]),
 });
 
 export const updateEventSchema = z.object({
@@ -33,6 +41,15 @@ export const updateEventSchema = z.object({
   endTime: z.date(),
   venue: z.string(),
   cityId: z.string(),
+  category: z.enum([
+    "MUSIC",
+    "SPORTS",
+    "COMEDY",
+    "TECH",
+    "EDUCATION",
+    "WORKSHOP",
+    "PREMIERE",
+  ]),
   description: z.string(),
   bannerImageUrl: z.string(),
   seats: z.array(seatSchema),
@@ -96,8 +113,72 @@ export const TicketBookingSchema = z.object({
         "LUXURY",
       ]),
       seatNumber: z.string(),
-      id: z.string()
+      id: z.string(),
     })
   ),
   eventId: z.string(),
 });
+
+type EventCategory =
+  | "MUSIC"
+  | "SPORTS"
+  | "COMEDY"
+  | "TECH"
+  | "EDUCATION"
+  | "WORKSHOP"
+  | "PREMIERE";
+
+type SeatType =
+  | "REGULAR"
+  | "PREMIUM"
+  | "RECLINER"
+  | "VIP"
+  | "COUPLE"
+  | "BALCONY"
+  | "SOFA"
+  | "LUXURY";
+
+export interface IBooking {}
+
+export interface IPayment {}
+
+export interface IBookedSeat {}
+
+export interface ICity {
+  id: string;
+  name: string;
+  state: string;
+  country: string;
+  events: IEvent[];
+}
+
+export interface ISeat {
+  id: string;
+  price: number;
+  type: SeatType;
+  seatNumber: number;
+  lockedUntil?: Date;
+  eventId: string;
+  bookedSeat?: IBookedSeat;
+}
+
+export interface IEvent {
+  id: string;
+  name: string;
+  startTime: Date;
+  endTime: Date;
+  venue: string;
+  cityId: string;
+  category: EventCategory;
+  bookings: IBooking[];
+  payments: IPayment[];
+  seats: ISeat[];
+  isFeatured: boolean;
+  isPremiere: boolean;
+  views: number;
+  description: string;
+  bannerImageUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+  adminId: string;
+}
