@@ -122,7 +122,7 @@ export default function AuthForm() {
               : "Account created successfully",
         });
 
-        router.push("/dashboard");
+        router.push("/home");
       } else {
         toast.error("Error", {
           description: data.message,

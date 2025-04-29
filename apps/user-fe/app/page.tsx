@@ -41,11 +41,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
-      <footer className="bg-gray-900 text-white text-center py-4 text-sm">
-        © {new Date().getFullYear()}{" "}
-        <span className="font-semibold">Latent</span>. All rights reserved.
-      </footer>
     </main>
   );
 }
