@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatDate, formatEventDateTime } from "@/lib/utils";
 
 interface Event {
   id: string;
@@ -42,18 +43,6 @@ export default function EventCarousel({ events }: { events: Event[] }) {
 
     return () => clearInterval(interval);
   }, [events]);
-
-  const formatDate = (date: string | Date) => {
-    const parsedDate = new Date(date);
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    }).format(parsedDate);
-  };
 
   if (!events || events.length === 0) {
     return (

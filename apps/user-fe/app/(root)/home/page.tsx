@@ -3,14 +3,10 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
-  Calendar,
-  MapPin,
-  Filter,
   ChevronRight,
   ArrowRight,
 } from "lucide-react";
@@ -177,7 +173,7 @@ export default function HomePage() {
               <p className="text-gray-400">Brand new releases every Friday</p>
             </div>
             <Link
-              href="/premieres"
+              href="/events?category=premiere"
               className="text-red-400 flex items-center text-sm font-medium"
             >
               See All <ChevronRight className="h-4 w-4" />
@@ -231,48 +227,44 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mb-12 bg-gray-100 dark:bg-gray-900 rounded-lg py-12 px-6">
-          <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">
+        <section className="mb-12 bg-red-600 rounded-lg py-12 px-6">
+          <h2 className="text-3xl font-bold text-center text-white mb-10">
             How It Works
           </h2>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-6xl mx-auto">
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition w-72">
-              <div className="text-red-600 dark:text-red-400 text-5xl mb-4">
-                🎟️
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+            <div className="text-center p-6 bg-white  rounded-lg shadow hover:shadow-md transition w-72">
+              <div className="text-red-600  text-5xl mb-4">🎟️</div>
+              <h3 className="text-xl font-semibold text-gray-800  mb-2">
                 Browse Events
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-800 ">
                 Explore movies, concerts, and more in your city or online.
               </p>
             </div>
 
-            <ArrowRight className="hidden md:block w-8 h-8 text-gray-500 dark:text-gray-300" />
+            <ArrowRight className="hidden md:block w-8 h-8 text-white " />
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition w-72">
+            <div className="text-center p-6 bg-white  rounded-lg shadow hover:shadow-md transition w-72">
               <div className="text-red-600 dark:text-red-400 text-5xl mb-4">
                 🛒
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+              <h3 className="text-xl font-semibold text-gray-800  mb-2">
                 Book Tickets
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-800  ">
                 Select your seats, confirm booking, and pay securely.
               </p>
             </div>
 
-            <ArrowRight className="hidden md:block w-8 h-8 text-gray-500 dark:text-gray-300" />
+            <ArrowRight className="hidden md:block w-8 h-8 text-white " />
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition w-72">
-              <div className="text-red-600 dark:text-red-400 text-5xl mb-4">
-                📱
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">
+            <div className="text-center p-6 bg-white  rounded-lg shadow hover:shadow-md transition w-72">
+              <div className="text-red-600  text-5xl mb-4">📱</div>
+              <h3 className="text-xl font-semibold text-gray-800  mb-2">
                 Enjoy the Show
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-800  ">
                 Use your e-ticket and experience the event live!
               </p>
             </div>
