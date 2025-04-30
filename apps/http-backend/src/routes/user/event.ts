@@ -21,6 +21,39 @@ enum EventCategory {
   PREMIERE = "PREMIERE",
 }
 
+eventRouter.get(
+  "/event/:eventId",
+  userMiddleware,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { eventId } = req.params;
+
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        include: {
+          seats: true,
+          city: true,
+        },
+      });
+
+      const minPrice = event?.seats.length
+        ? Math.min(...event.seats.map((seat) => seat.price))
+        : null;
+
+      const eventWithMinPrice = {
+        ...event,
+        minPrice,
+      };
+      res.status(200).json({ event: eventWithMinPrice });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
 eventRouter.post(
   "/:eventId/view",
   userMiddleware,
@@ -140,7 +173,7 @@ eventRouter.get(
 );
 
 eventRouter.get(
-  "/by-category",
+  "/category/by-category",
   userMiddleware,
   async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
     try {
@@ -153,14 +186,32 @@ eventRouter.get(
         return;
       }
 
-      const events = await prisma.event.findMany({
-        where: {
-          category: category as EventCategory,
-        },
-      });
+      const cat = category.toString().toUpperCase();
+
+      let events;
+
+      if (cat === "ALL") {
+        events = await prisma.event.findMany({
+          include: {
+            city: true,
+            seats: true,
+          },
+        });
+      } else {
+        events = await prisma.event.findMany({
+          where: {
+            category: cat as EventCategory,
+          },
+          include: {
+            seats: true,
+            city: true,
+          },
+        });
+      }
 
       res.status(200).json({ events });
     } catch (error) {
+      console.error(error);
       res.status(500).json({
         success: false,
         message: "Internal Server Error",
@@ -182,56 +233,6 @@ eventRouter.get(
       });
 
       res.status(200).json({ events });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
-    }
-  }
-);
-
-eventRouter.get(
-  "/cities/all",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const cities = await prisma.city.findMany({});
-      res.status(200).json({
-        cities,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: "Internal Server Error",
-      });
-    }
-  }
-);
-
-eventRouter.get(
-  "/cities/top",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-      const topCities = await prisma.city.findMany({
-        take: 5,
-        orderBy: {
-          events: {
-            _count: "desc",
-          },
-        },
-        include: {
-          _count: {
-            select: { events: true },
-          },
-        },
-      });
-
-      res.status(200).json({
-        success: true,
-        cities: topCities,
-      });
     } catch (error) {
       res.status(500).json({
         success: false,

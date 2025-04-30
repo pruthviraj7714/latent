@@ -1,5 +1,29 @@
 import axios from "axios";
 
+export const fetchEventDetails = async (eventId : string) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${eventId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return res.data.event;
+};
+
+export const fetchEventsByCategory = async (category : string) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/category/by-category?category=${category}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return res.data.events;
+};
+
 export const getFeaturedEvents = async () => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/featured`,
