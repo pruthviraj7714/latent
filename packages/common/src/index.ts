@@ -149,7 +149,7 @@ export interface ICity {
   name: string;
   state: string;
   country: string;
-  events: IEvent[];
+  events?: IEvent[];
 }
 
 export interface ISeat {
@@ -168,11 +168,12 @@ export interface IEvent {
   startTime: Date;
   endTime: Date;
   venue: string;
-  cityId: string;
+  cityId?: string;
+  city? : ICity;
   category: EventCategory;
   bookings: IBooking[];
   payments: IPayment[];
-  seats: ISeat[];
+  seats?: ISeat[];
   isFeatured: boolean;
   isPremiere: boolean;
   views: number;
@@ -181,4 +182,5 @@ export interface IEvent {
   createdAt: Date;
   updatedAt: Date;
   adminId: string;
+  minPrice : number;
 }
