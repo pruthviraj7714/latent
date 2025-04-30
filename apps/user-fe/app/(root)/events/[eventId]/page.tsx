@@ -1,7 +1,7 @@
+import EventPage from "app/components/EventPage";
 
+export default async function Page({ params }: { params: Promise<{ eventId: string }> }) {
+  const eventId = (await params).eventId;
 
-const EventPage = () => {
-  return <div>EventPage</div>;
-};
-
-export default EventPage;
+  return <EventPage eventId={eventId} />;
+}
