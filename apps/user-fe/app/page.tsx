@@ -1,5 +1,6 @@
 import Image from "next/image";
 import AuthForm from "./components/auth-form";
+import { Ticket } from "lucide-react";
 
 export default function Home() {
   return (
@@ -7,15 +8,15 @@ export default function Home() {
       <div className="flex-1 flex flex-col md:flex-row">
         <div className="w-full md:w-1/2 bg-gradient-to-br from-red-700 via-red-800 to-red-900 text-white flex flex-col justify-center items-center p-10">
           <div className="max-w-md w-full space-y-6 text-center">
-            <Image
-              src="https://i.pinimg.com/736x/4b/67/7c/4b677cc267aaed3b4a0c215a82858828.jpg"
-              alt="Latent Logo"
-              width={100}
-              height={40}
-              className="mx-auto rounded-full shadow-md"
-            />
+            <div className="flex justify-center items-center gap-2">
+              <Ticket className="w-6 h-6 text-amber-400" />
+              <span className="text-lg font-extrabold tracking-tight">
+                <span className="text-white">Latent</span>
+                <span className="text-white/80">Booking</span>
+              </span>
+            </div>
             <h1 className="text-4xl font-extrabold tracking-tight leading-snug">
-              Welcome to <span className="text-yellow-300">Latent</span>
+              Welcome to <span className="text-amber-400">Latent</span>
             </h1>
             <p className="text-lg opacity-90">
               Your one-stop destination for booking tickets to the best events
