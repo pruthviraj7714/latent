@@ -323,6 +323,7 @@ async function main() {
         userId: users[randomUserIndex]!.id,
         eventId: randomEvent!.id,
         status: bookingStatus,
+        amount : 4000
       },
     });
 
@@ -344,6 +345,7 @@ async function main() {
           bookingId: booking.id,
           status: paymentStatus,
           eventId: randomEvent.id,
+          amount : 4000
         },
       });
     }

@@ -81,6 +81,7 @@ model Booking {
   event       Event         @relation(fields: [eventId], references: [id])
   status      BookingStatus @default(PENDING)
   userId      String
+  amount      Int
   user        User          @relation(fields: [userId], references: [id])
   payment     Payment?
 }
@@ -93,6 +94,7 @@ model Payment {
   booking   Booking       @relation(fields: [bookingId], references: [id])
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  amount    Int
   status    PaymentStatus @default(PENDING)
   event     Event?        @relation(fields: [eventId], references: [id])
   eventId   String?
