@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import {
   Facebook,
   Twitter,
@@ -28,19 +27,19 @@ export default function Footer() {
               sports, and more.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-white">
+              <Link href="#" className="text-gray-400 hover:text-red-500">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
+              <Link href="#" className="text-gray-400 hover:text-red-500">
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
+              <Link href="#" className="text-gray-400 hover:text-red-500">
                 <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
+              <Link href="#" className="text-gray-400 hover:text-red-500">
                 <Youtube className="h-5 w-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
+              <Link href="#" className="text-gray-400 hover:text-red-500">
                 <Linkedin className="h-5 w-5" />
               </Link>
             </div>
@@ -52,7 +51,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/about"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   About Us
                 </Link>
@@ -60,7 +59,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Contact Us
                 </Link>
@@ -68,7 +67,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/careers"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Careers
                 </Link>
@@ -76,7 +75,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/blog"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Blog
                 </Link>
@@ -84,7 +83,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/press"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Press Release
                 </Link>
@@ -98,7 +97,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/help"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Help Center
                 </Link>
@@ -106,7 +105,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/faq"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   FAQs
                 </Link>
@@ -114,7 +113,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/terms"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Terms & Conditions
                 </Link>
@@ -122,7 +121,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Privacy Policy
                 </Link>
@@ -130,7 +129,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/refund"
-                  className="text-gray-400 hover:text-white text-sm"
+                  className="text-gray-400 hover:text-red-500 text-sm"
                 >
                   Refund Policy
                 </Link>
@@ -139,30 +138,24 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4">Download App</h3>
+            <h3 className="font-bold text-lg mb-4">Stay Updated</h3>
             <p className="text-gray-400 text-sm mb-4">
-              Get the Latent mobile app for seamless booking on the go.
+              Subscribe to our newsletter for the latest updates and exclusive
+              offers.
             </p>
-            <div className="flex flex-col space-y-3">
-              <Link href="#">
-                <Image
-                  src="/images/app-store.png"
-                  alt="Download on App Store"
-                  width={140}
-                  height={42}
-                  className="h-10 w-auto"
-                />
-              </Link>
-              <Link href="#">
-                <Image
-                  src="/images/play-store.png"
-                  alt="Get it on Google Play"
-                  width={140}
-                  height={42}
-                  className="h-10 w-auto"
-                />
-              </Link>
-            </div>
+            <form className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="px-4 py-2 rounded-md bg-gray-800 text-white text-sm focus:outline-none w-full sm:w-auto"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md text-sm transition"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
 

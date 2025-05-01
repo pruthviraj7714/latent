@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   Search,
   Menu,
@@ -13,6 +13,7 @@ import {
   Ticket,
   Heart,
   Bell,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import CitySelector from "./city-selector";
+import { useQuery } from "@tanstack/react-query";
+import { IEvent } from "@repo/common/schema";
+import { fetchEventsBySearch } from "@/api/event";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,7 +36,29 @@ export default function Header() {
     name: string;
     phoneNumber: string;
   } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
+  const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (target.closest(".search-item")) return;
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setIsSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -44,6 +70,34 @@ export default function Header() {
       }
     }
   }, []);
+
+  const {
+    isPending: isEventsLoading,
+    isError: isEventsError,
+    data: events,
+    error: eventsError,
+  } = useQuery<IEvent[]>({
+    queryKey: ["events", debouncedSearchQuery],
+    queryFn: () => fetchEventsBySearch(debouncedSearchQuery),
+    enabled: debouncedSearchQuery.length > 2 && isSearchOpen,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (value.length > 2) {
+      setIsSearchOpen(true);
+    } else {
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleSearchItemClick = (eventId: string) => {
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    router.push(`/events/${eventId}`);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -66,13 +120,74 @@ export default function Header() {
           </Link>
 
           <div className="hidden md:flex items-center space-x-4 flex-1 max-w-md mx-4">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white h-4 w-4" />
+            <div className="relative w-full" ref={searchRef}>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-100 h-4 w-4" />
               <Input
                 type="search"
                 placeholder="Search for events, plays, sports and activities"
-                className="pl-10 text-white placeholder:text-white bg-white"
+                className="pl-10 bg-white text-white placeholder:text-red-200 border-none focus-visible:ring-1 focus-visible:ring-red-500"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={() => {
+                  if (searchQuery.length > 2) setIsSearchOpen(true);
+                }}
               />
+              {isSearchOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-md shadow-lg z-10 max-h-[300px] overflow-y-auto border border-gray-200">
+                  {isEventsLoading ? (
+                    <div className="flex items-center justify-center p-4">
+                      <Loader2 className="h-5 w-5 text-red-500 animate-spin mr-2" />
+                      <span>Searching...</span>
+                    </div>
+                  ) : isEventsError ? (
+                    <div className="p-4 text-center text-red-500">
+                      Something went wrong. Please try again.
+                    </div>
+                  ) : events && events.length > 0 ? (
+                    <div>
+                      {events.map((event: IEvent) => (
+                        <div
+                          key={event.id}
+                          className="search-item flex items-center justify-between p-3 hover:bg-gray-200 cursor-pointer border-b border-gray-100 last:border-b-0"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleSearchItemClick(event.id);
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={event.bannerImageUrl}
+                              className="h-10 w-10 rounded-md object-cover"
+                              alt={event.name}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium text-gray-800">
+                                {event.name}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(event.startTime).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-xs text-gray-500">
+                              Starts From
+                            </span>
+                            <span className="font-medium text-red-500">
+                              ₹{event.minPrice}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : debouncedSearchQuery ? (
+                    <div className="p-4 text-center text-gray-600">
+                      No events found for "{debouncedSearchQuery}"
+                    </div>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
 
@@ -141,13 +256,72 @@ export default function Header() {
       </div>
 
       <div className="md:hidden px-4 py-2 bg-white">
-        <div className="relative">
+        <div className="relative" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             type="search"
-            placeholder="Search for events, plays, sports..."
+            placeholder="Search events, plays, sports..."
             className="pl-10 bg-white"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFocus={() => {
+              if (searchQuery.length > 2) setIsSearchOpen(true);
+            }}
           />
+          {isSearchOpen && (
+            <div className="absolute left-0 right-0 top-full mt-1 bg-white shadow-lg z-10 max-h-[400px] overflow-y-auto border border-gray-200 rounded-md">
+              {isEventsLoading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="h-5 w-5 text-red-500 animate-spin mr-2" />
+                  <span>Searching...</span>
+                </div>
+              ) : isEventsError ? (
+                <div className="p-4 text-center text-red-500">
+                  Something went wrong. Please try again.
+                </div>
+              ) : events && events.length > 0 ? (
+                <div>
+                  {events.map((event: IEvent) => (
+                    <div
+                      key={event.id}
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSearchItemClick(event.id);
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={event.bannerImageUrl}
+                          className="h-10 w-10 rounded-md object-cover"
+                          alt={event.name}
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-800">
+                            {event.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(event.startTime).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-gray-500">From</span>
+                        <span className="font-medium text-red-500">
+                          ₹{event.minPrice}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : debouncedSearchQuery ? (
+                <div className="p-4 text-center text-gray-600">
+                  No events found for "{debouncedSearchQuery}"
+                </div>
+              ) : null}
+            </div>
+          )}
         </div>
       </div>
 
@@ -212,18 +386,10 @@ export default function Header() {
             </li>
             <li>
               <Link
-                href="/offers"
-                className="text-red-600 font-semibold whitespace-nowrap"
-              >
-                Offers
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/gift-cards"
+                href="/events?category=workshop"
                 className="text-gray-700 hover:text-red-600 whitespace-nowrap"
               >
-                Gift Cards
+                Workshop
               </Link>
             </li>
           </ul>

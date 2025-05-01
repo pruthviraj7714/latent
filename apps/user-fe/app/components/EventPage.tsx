@@ -7,7 +7,7 @@ import { TicketCard } from "app/components/ticket-card";
 import { fetchEventDetails } from "@/api/event";
 import { useQuery } from "@tanstack/react-query";
 import { IEvent } from "@repo/common/schema";
-import { formatDate, formatEventDateTime } from "@/lib/utils";
+import { formatEventDateTime } from "@/lib/utils";
 
 interface TicketSelection {
   [key: string]: number;
@@ -26,15 +26,27 @@ export default function EventPage({ eventId }: { eventId: string }) {
     queryFn: () => fetchEventDetails(eventId),
   });
 
-  if (!event) {
+  if (!event || !event.seats) {
     return;
   }
 
-  const ticketTypes = [
-    { name: "VIP", price: 2000, available: 50 },
-    { name: "Premium", price: 1500, available: 100 },
-    { name: "Standard", price: 1000, available: 200 },
-  ];
+  const ticketTypesMap = new Map();
+
+  for (const seat of event?.seats!) {
+    const key = `${seat.type}_${seat.price}`;
+    if (ticketTypesMap.has(key)) {
+      if (!seat.bookedSeat) {
+        ticketTypesMap.get(key).available++;
+      }
+    } else {
+      ticketTypesMap.set(key, {
+        name: seat.type,
+        price: seat.price,
+        available: 1,
+      });
+    }
+  }
+  const ticketTypes = Array.from(ticketTypesMap.values());
 
   const totalAmount = Object.entries(selectedTickets).reduce(
     (acc, [type, count]) => {
@@ -67,7 +79,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
             </h1>
             <div className="flex justify-between w-full">
               <div className="flex items-center gap-2 text-neutral-400">
-                <span className="px-3 py-1 rounded-full text-white bg-red-500 border border-neutral-800">
+                <span className="px-3 py-1 rounded-full text-sm text-white bg-red-500 border border-neutral-800">
                   {event.category}
                 </span>
               </div>
@@ -93,7 +105,9 @@ export default function EventPage({ eventId }: { eventId: string }) {
             <div>
               <h3 className="text-sm text-neutral-500 mb-1">Venue</h3>
               <p className="text-lg">{event.venue}</p>
-              <p className="text-neutral-500">{event.city?.name + ", " + event.city?.state}</p>
+              <p className="text-neutral-500">
+                {event.city?.name + ", " + event.city?.state}
+              </p>
             </div>
           </div>
         </div>
@@ -108,13 +122,6 @@ export default function EventPage({ eventId }: { eventId: string }) {
                   name={ticket.name}
                   price={ticket.price}
                   available={ticket.available}
-                  benefits={
-                    ticket.name === "VIP"
-                      ? "Priority Entry + Lounge Access"
-                      : ticket.name === "Premium"
-                        ? "Priority Entry"
-                        : "Standard Entry"
-                  }
                   selected={selectedTickets[ticket.name] || 0}
                   onSelect={(count) =>
                     setSelectedTickets((prev) => ({
@@ -192,8 +199,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
               </Button>
             )}
             <Button
-              className="py-6 text-md"
-              variant="default"
+              className={`py-6 text-md cursor-pointer ${hasSelectedTickets ? "bg-red-500 hover:bg-red-600" : ""}`}
               disabled={!hasSelectedTickets}
             >
               {hasSelectedTickets ? "Proceed to Payment" : "Select Tickets"}

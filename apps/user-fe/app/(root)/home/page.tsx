@@ -6,10 +6,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import {
-  ChevronRight,
-  ArrowRight,
-} from "lucide-react";
+import { ChevronRight, ArrowRight } from "lucide-react";
 import EventCarousel from "app/components/event-carousel";
 import EventCard from "app/components/event-card";
 import MainLayout from "app/components/layouts/main-layout";
@@ -151,15 +148,28 @@ export default function HomePage() {
                 className="space-y-4"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {featuredEvents &&
-                    featuredEvents.length > 0 &&
-                    featuredEvents
-                      .filter(
+                  {isFeaturedLoading ? (
+                    <p className="text-gray-500">Loading events...</p>
+                  ) : (
+                    <>
+                      {featuredEvents &&
+                      featuredEvents.filter(
                         (e: IEvent) => e.category === category.toUpperCase()
-                      )
-                      .map((event: IEvent) => (
-                        <EventCard key={event.id} event={event} />
-                      ))}
+                      ).length > 0 ? (
+                        featuredEvents
+                          .filter(
+                            (e: IEvent) => e.category === category.toUpperCase()
+                          )
+                          .map((event: IEvent) => (
+                            <EventCard key={event.id} event={event} />
+                          ))
+                      ) : (
+                        <p className="text-gray-500">
+                          No events in this category.
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               </TabsContent>
             ))}
@@ -180,8 +190,9 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {premieredEvents &&
-              premieredEvents.length > 0 &&
+            {isPremieredEventLoading ? (
+              <p className="text-gray-400">Loading premieres...</p>
+            ) : premieredEvents && premieredEvents.length > 0 ? (
               premieredEvents.map((premiere: IEvent) => (
                 <Card
                   key={premiere.id}
@@ -204,7 +215,10 @@ export default function HomePage() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+            ) : (
+              <p className="text-gray-400">No premiere events found.</p>
+            )}
           </div>
         </section>
 
@@ -219,11 +233,15 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {popularEvents &&
-              popularEvents.lenght > 0 &&
+            {isPopularEventLoading ? (
+              <p className="text-gray-500">Loading popular events...</p>
+            ) : popularEvents && popularEvents.length > 0 ? (
               popularEvents.map((event: IEvent) => (
                 <EventCard key={event.id} event={event} />
-              ))}
+              ))
+            ) : (
+              <p className="text-gray-500">No popular events available.</p>
+            )}
           </div>
         </section>
 

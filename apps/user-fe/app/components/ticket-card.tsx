@@ -7,7 +7,6 @@ interface TicketCardProps {
   name: string
   price: number
   available: number
-  benefits: string
   selected: number
   onSelect: (count: number) => void
   showQuantityControls?: boolean
@@ -17,7 +16,6 @@ export function TicketCard({
   name,
   price,
   available,
-  benefits,
   selected,
   onSelect,
   showQuantityControls = false,
@@ -44,7 +42,6 @@ export function TicketCard({
           <span className="text-xs text-neutral-500">{available} available</span>
         </div>
         <p className="text-lg font-semibold">₹{price.toLocaleString()}</p>
-        <p className="text-xs text-neutral-500">{benefits}</p>
       </div>
 
       {showQuantityControls ? (

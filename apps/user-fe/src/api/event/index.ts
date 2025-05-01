@@ -83,3 +83,15 @@ export const getPremiereEvents = async () => {
   );
   return res.data.events;
 };
+
+export const fetchEventsBySearch = async (searchQuery : string) => {
+  const res = await axios.get(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/search-event?search=${searchQuery}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return res.data.events;
+};
