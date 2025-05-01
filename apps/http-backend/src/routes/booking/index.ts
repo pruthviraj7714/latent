@@ -30,7 +30,7 @@ bookingRouter.post(
         return;
       }
 
-      const { eventId, seats } = data;
+      const { eventId, seats, amount } = data;
 
       const isAlreadyBooked = await prisma.bookedSeat.findMany({
         where: {
@@ -43,6 +43,7 @@ bookingRouter.post(
       if (isAlreadyBooked.length > 0) {
         res.status(400).json({
           message: "Sorry, some of the selected seats have already been booked. Please choose different seats.",
+          success : false
         });
         return;
       }
@@ -59,6 +60,7 @@ bookingRouter.post(
               })),
             },
           },
+          amount
         },
       });
 
@@ -76,6 +78,10 @@ bookingRouter.post(
       res.status(201).json({
         message: "Your booking has been successfully initiated.",
         bookingId: booking.id,
+        userId,
+        eventId,
+        amount,
+        success : true
       });
     } catch (error) {
       console.error("Error while booking tickets:", error);

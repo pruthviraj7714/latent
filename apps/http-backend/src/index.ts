@@ -22,7 +22,7 @@ app.use("/api/v1/admin/event", adminEventRouter);
 app.use("/api/v1/events", eventRouter);
 app.use("/api/v1/cities", cityRouter);
 app.use("/api/v1/superadmin", superAdminRouter);
-app.use("/api/v1/razorpay", paymentRouter);
+app.use("/api/v1/payment", paymentRouter);
 app.use("/api/v1/booking", bookingRouter);
 
 app.listen(8080, () => {

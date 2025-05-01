@@ -6,15 +6,20 @@ import React, { useState } from "react";
 import { TicketCard } from "app/components/ticket-card";
 import { fetchEventDetails } from "@/api/event";
 import { useQuery } from "@tanstack/react-query";
-import { IEvent } from "@repo/common/schema";
+import { IBookedSeat, IEvent } from "@repo/common/schema";
 import { formatEventDateTime } from "@/lib/utils";
+import axios from "axios";
+import { toast } from "sonner";
+import { cashfree } from "@/lib/cashfree";
 
-interface TicketSelection {
-  [key: string]: number;
+interface SelectedSeat {
+  id: string;
+  price: number;
+  type: string;
 }
 
 export default function EventPage({ eventId }: { eventId: string }) {
-  const [selectedTickets, setSelectedTickets] = useState<TicketSelection>({});
+  const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([]);
 
   const {
     isPending: isEventLoading,
@@ -26,14 +31,73 @@ export default function EventPage({ eventId }: { eventId: string }) {
     queryFn: () => fetchEventDetails(eventId),
   });
 
+  const handleProceedToPayment = async () => {
+    let response;
+    try {
+      response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/booking/book-tickets`,
+        {
+          eventId,
+          seats: selectedSeats,
+          amount: finalAmount,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      toast.success("Redirecting to Booking page");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
+      return;
+    }
+
+    try {
+      const { bookingId, userId, eventId, amount } = response.data;
+      const res2 = await axios.post("/api/payments/initiate-payment", {
+        bookingId,
+        userId,
+        eventId,
+        amount,
+      });
+
+      const data = res2.data;
+      let checkoutOptions = {
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self",
+      };
+      cashfree.checkout(checkoutOptions);
+    } catch (err: any) {
+      console.error("Error during booking/payment", err);
+      toast.error(
+        "Something went wrong during booking or payment",
+        err.message
+      );
+    }
+  };
+
   if (!event || !event.seats) {
     return;
   }
 
   const ticketTypesMap = new Map();
+  const availableSeatsMap = new Map();
 
-  for (const seat of event?.seats!) {
+  for (const seat of event.seats) {
     const key = `${seat.type}_${seat.price}`;
+
+    if (!seat.bookedSeat) {
+      if (!availableSeatsMap.has(key)) {
+        availableSeatsMap.set(key, []);
+      }
+      availableSeatsMap.get(key).push({
+        id: seat.id,
+        price: seat.price,
+        type: seat.type,
+      });
+    }
+
     if (ticketTypesMap.has(key)) {
       if (!seat.bookedSeat) {
         ticketTypesMap.get(key).available++;
@@ -42,23 +106,72 @@ export default function EventPage({ eventId }: { eventId: string }) {
       ticketTypesMap.set(key, {
         name: seat.type,
         price: seat.price,
-        available: 1,
+        available: seat.bookedSeat ? 0 : 1,
       });
     }
   }
+
   const ticketTypes = Array.from(ticketTypesMap.values());
 
-  const totalAmount = Object.entries(selectedTickets).reduce(
-    (acc, [type, count]) => {
-      const ticket = ticketTypes.find((t) => t.name === type);
-      return acc + (ticket?.price || 0) * count;
+  const selectedTicketsCount = selectedSeats.reduce(
+    (acc, seat) => {
+      if (!acc[seat.type]) {
+        acc[seat.type] = 0;
+      }
+      acc[seat.type]!++;
+      return acc;
     },
-    0
+    {} as Record<string, number>
   );
 
-  const hasSelectedTickets = Object.values(selectedTickets).some(
-    (count) => count > 0
-  );
+  const handleTicketSelection = (
+    type: string,
+    price: number,
+    count: number
+  ) => {
+    const currentCount = selectedTicketsCount[type] || 0;
+    const key = `${type}_${price}`;
+    const availableSeats = availableSeatsMap.get(key) || [];
+
+    if (count > currentCount) {
+      const seatsToAdd = count - currentCount;
+      const newSelectedSeats = [...selectedSeats];
+
+      for (let i = 0; i < seatsToAdd && i < availableSeats.length; i++) {
+        const seatToAdd = availableSeats.find(
+          (seat: IBookedSeat) =>
+            !selectedSeats.some((selected) => selected.id === seat.seatId)
+        );
+
+        if (seatToAdd) {
+          newSelectedSeats.push(seatToAdd);
+        }
+      }
+
+      setSelectedSeats(newSelectedSeats);
+    } else if (count < currentCount) {
+      const seatsToRemove = currentCount - count;
+      const newSelectedSeats = [...selectedSeats];
+
+      for (let i = 0; i < seatsToRemove; i++) {
+        const indexToRemove = newSelectedSeats.findIndex(
+          (seat) => seat.type === type
+        );
+        if (indexToRemove !== -1) {
+          newSelectedSeats.splice(indexToRemove, 1);
+        }
+      }
+
+      setSelectedSeats(newSelectedSeats);
+    }
+  };
+
+  const hasSelectedTickets = selectedSeats.length > 0;
+
+  const totalAmount = selectedSeats.reduce((acc, seat) => acc + seat.price, 0);
+  const gstAmount = Math.round(totalAmount * 0.18);
+  const convenienceFee = hasSelectedTickets ? 50 : 0;
+  const finalAmount = totalAmount + gstAmount + convenienceFee;
 
   return (
     <main className="min-h-screen max-w-7xl mx-auto flex flex-col gap-8">
@@ -118,16 +231,13 @@ export default function EventPage({ eventId }: { eventId: string }) {
             <div className="space-y-3">
               {ticketTypes.map((ticket) => (
                 <TicketCard
-                  key={ticket.name}
+                  key={`${ticket.name}_${ticket.price}`}
                   name={ticket.name}
                   price={ticket.price}
                   available={ticket.available}
-                  selected={selectedTickets[ticket.name] || 0}
+                  selected={selectedTicketsCount[ticket.name] || 0}
                   onSelect={(count) =>
-                    setSelectedTickets((prev) => ({
-                      ...prev,
-                      [ticket.name]: count,
-                    }))
+                    handleTicketSelection(ticket.name, ticket.price, count)
                   }
                   showQuantityControls
                 />
@@ -137,10 +247,13 @@ export default function EventPage({ eventId }: { eventId: string }) {
 
           <div className="bg-white rounded-xl border border-neutral-800 p-6 space-y-4 mt-4">
             <h3 className="text-lg font-semibold">Order Summary</h3>
-            {Object.entries(selectedTickets).map(([type, count]) => {
+            {Object.entries(selectedTicketsCount).map(([type, count]) => {
               if (count === 0) return null;
               const ticket = ticketTypes.find((t) => t.name === type);
-              const amount = (ticket?.price || 0) * count;
+              const amount = selectedSeats
+                .filter((seat) => seat.type === type)
+                .reduce((sum, seat) => sum + seat.price, 0);
+
               return (
                 <div key={type} className="flex justify-between text-sm">
                   <span>
@@ -177,12 +290,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
               <div className="border-t border-neutral-800 pt-4 flex justify-between">
                 <span className="font-medium">Total Amount</span>
                 <span className="font-medium text-bms-red">
-                  ₹
-                  {(
-                    totalAmount +
-                    Math.round(totalAmount * 0.18) +
-                    (hasSelectedTickets ? 50 : 0)
-                  ).toLocaleString()}
+                  ₹{finalAmount.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -193,7 +301,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
               <Button
                 className="py-6 text-md"
                 variant="outline"
-                onClick={() => setSelectedTickets({})}
+                onClick={() => setSelectedSeats([])}
               >
                 Clear Selection
               </Button>
@@ -201,6 +309,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
             <Button
               className={`py-6 text-md cursor-pointer ${hasSelectedTickets ? "bg-red-500 hover:bg-red-600" : ""}`}
               disabled={!hasSelectedTickets}
+              onClick={handleProceedToPayment}
             >
               {hasSelectedTickets ? "Proceed to Payment" : "Select Tickets"}
             </Button>

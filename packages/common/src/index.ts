@@ -55,47 +55,45 @@ export const updateEventSchema = z.object({
   seats: z.array(seatSchema),
 });
 
-export const RazorpayWebhookSchema = z.object({
-  entity: z.literal("event"),
-  account_id: z.string(),
-  event: z.string(),
-  contains: z.array(z.string()),
-  payload: z.object({
-    payment: z.object({
-      entity: z.object({
-        id: z.string(),
-        entity: z.literal("payment"),
-        amount: z.number(),
-        currency: z.string(),
-        status: z.string(),
-        order_id: z.string(),
-        invoice_id: z.string().nullable(),
-        international: z.boolean(),
-        method: z.string(),
-        amount_refunded: z.number(),
-        refund_status: z.string().nullable(),
-        captured: z.boolean(),
-        description: z.string(),
-        card_id: z.string(),
-        bank: z.string().nullable(),
-        wallet: z.string().nullable(),
-        vpa: z.string().nullable(),
-        email: z.string(),
-        contact: z.string(),
-        notes: z.object({
-          bookingId: z.string(),
-          userId: z.string(),
-          eventId: z.string(),
-          seatIds: z.array(z.string()),
-        }),
-        fee: z.number(),
-        tax: z.number(),
-        created_at: z.number(),
-      }),
+export const CashfreewebhookSchema = z.object({
+  data: z.object({
+    order: z.object({
+      order_id: z.string(),
+      order_amount: z.number(),
+      order_currency: z.string(),
+      order_tags: z.nullable(z.unknown()), // You can make this more specific if needed
     }),
+    payment: z.object({
+      cf_payment_id: z.string(), // corrected from number to string
+      payment_status: z.enum(["SUCCESS", "FAILED", "PENDING"]), // restrict to expected values
+      payment_amount: z.number(),
+      payment_currency: z.string(),
+      payment_message: z.string(),
+      payment_time: z.string(), // ISO 8601 string
+      bank_reference: z.string(),
+      auth_id: z.nullable(z.string()),
+      payment_method: z.record(z.unknown()), // object type
+      payment_group: z.string(),
+    }),
+    customer_details: z.object({
+      customer_name: z.nullable(z.string()),
+      customer_id: z.string(),
+      customer_email: z.nullable(z.string()),
+      customer_phone: z.string(),
+    }),
+    payment_gateway_details: z.object({
+      gateway_name: z.string(),
+      gateway_order_id: z.string(),
+      gateway_payment_id: z.string(),
+      gateway_status_code: z.nullable(z.string()),
+      gateway_order_reference_id: z.string().or(z.literal("null")),
+      gateway_settlement: z.string(),
+      gateway_reference_name: z.nullable(z.string()),
+    }),
+    payment_offers: z.null(),
   }),
-  created_at: z.number(),
-  webHookSecret: z.string(),
+  event_time: z.string(),
+  type: z.literal("PAYMENT_SUCCESS_WEBHOOK"), // more precise
 });
 
 export const TicketBookingSchema = z.object({
@@ -112,11 +110,11 @@ export const TicketBookingSchema = z.object({
         "SOFA",
         "LUXURY",
       ]),
-      seatNumber: z.string(),
       id: z.string(),
     })
   ),
   eventId: z.string(),
+  amount : z.number()
 });
 
 type EventCategory =
@@ -142,7 +140,11 @@ export interface IBooking {}
 
 export interface IPayment {}
 
-export interface IBookedSeat {}
+export interface IBookedSeat {
+  id: string;
+  seatId: string;
+  bookingId: string;
+}
 
 export interface ICity {
   id: string;
@@ -169,7 +171,7 @@ export interface IEvent {
   endTime: Date;
   venue: string;
   cityId?: string;
-  city? : ICity;
+  city?: ICity;
   category: EventCategory;
   bookings: IBooking[];
   payments: IPayment[];
@@ -182,5 +184,5 @@ export interface IEvent {
   createdAt: Date;
   updatedAt: Date;
   adminId: string;
-  minPrice : number;
+  minPrice: number;
 }

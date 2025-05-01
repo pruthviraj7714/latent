@@ -66,6 +66,9 @@ importers:
 
   apps/user-fe:
     dependencies:
+      '@cashfreepayments/cashfree-js':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@radix-ui/react-accordion':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -139,6 +142,9 @@ importers:
         specifier: ^4.1.4
         version: 4.1.4
     devDependencies:
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -336,6 +342,9 @@ packages:
   '@babel/runtime-corejs3@7.27.0':
     resolution: {integrity: sha512-UWjX6t+v+0ckwZ50Y5ShZLnlk95pP5MyW/pon9tiYzl3+18pkTHTFNTKr7rQbfRXPkowt2QAn30o1b6oswszew==}
     engines: {node: '>=6.9.0'}
+
+  '@cashfreepayments/cashfree-js@1.0.5':
+    resolution: {integrity: sha512-fP9wi9mseXJmESGIkD9vb6RAKdSZw42jXiQY2LUt5A2STyEqMv0mYLgK2zqpMNSbdK9QdN1c4YnEv9mmyxC8mg==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3523,6 +3532,8 @@ snapshots:
     dependencies:
       core-js-pure: 3.41.0
       regenerator-runtime: 0.14.1
+
+  '@cashfreepayments/cashfree-js@1.0.5': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
