@@ -190,6 +190,46 @@ eventRouter.get(
 );
 
 eventRouter.get(
+  "/search-event",
+  userMiddleware,
+  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const searchQuery = req.query.search;
+
+      if (!searchQuery) {
+        res.status(400).json({
+          message: "Search Query is missing!",
+        });
+        return;
+      }
+
+      const events = await prisma.event.findMany({
+        where: {
+          name: {
+            contains: searchQuery as string,
+            mode: "insensitive",
+          },
+        },
+        include: {
+          city: true,
+          seats: true,
+        },
+      });
+
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
+eventRouter.get(
   "/category/by-category",
   userMiddleware,
   async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
