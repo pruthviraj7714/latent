@@ -49,7 +49,7 @@ export default function EventCard({ event }: { event: IEvent }) {
           <div className="flex justify-between items-center">
             <div>
               <div className="text-xs text-gray-500">Starting from</div>
-              {/* <div className="font-bold text-red-600">₹{event.minPrice}</div> */}
+              <div className="font-bold text-red-600">₹{event.minPrice}</div>
             </div>
             <Button size="sm" className="bg-red-600 hover:bg-red-700">
               Book

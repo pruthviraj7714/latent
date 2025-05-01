@@ -1,6 +1,7 @@
 import { Request, Response, Router } from "express";
 import { prisma } from "@repo/db/client";
 import { userMiddleware } from "../../middlewares/authMiddleware";
+import { addMinPriceToEvents } from "../../utils/helper";
 
 const eventRouter: Router = Router();
 
@@ -92,10 +93,15 @@ eventRouter.get(
         where: {
           isFeatured: true,
         },
+        include: {
+          seats: true,
+        },
         take: 5,
       });
 
-      res.status(200).json({ events });
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
       return;
     } catch (error) {
       res.status(500).json({
@@ -132,11 +138,16 @@ eventRouter.get(
           category: recommendedCategory as EventCategory,
           startTime: { gte: new Date() },
         },
+        include: {
+          seats: true,
+        },
         orderBy: { views: "desc" },
         take: 5,
       });
 
-      res.status(200).json({ events });
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -157,12 +168,18 @@ eventRouter.get(
             gte: new Date(),
           },
         },
+        include: {
+          seats: true,
+        },
         orderBy: {
           views: "desc",
         },
         take: 5,
       });
-      res.status(200).json({ events });
+
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
     } catch (error) {
       res.status(500).json({
         success: false,
@@ -209,7 +226,9 @@ eventRouter.get(
         });
       }
 
-      res.status(200).json({ events });
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -229,10 +248,15 @@ eventRouter.get(
         where: {
           isPremiere: true,
         },
+        include: {
+          seats: true,
+        },
         take: 5,
       });
 
-      res.status(200).json({ events });
+      const eventsWithMinPrice = addMinPriceToEvents(events);
+
+      res.status(200).json({ events: eventsWithMinPrice });
     } catch (error) {
       res.status(500).json({
         success: false,
