@@ -32,7 +32,11 @@ eventRouter.get(
       const event = await prisma.event.findUnique({
         where: { id: eventId },
         include: {
-          seats: true,
+          seats: {
+            include : {
+              bookedSeat : true
+            }
+          },
           city: true,
         },
       });
