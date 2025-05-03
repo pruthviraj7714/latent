@@ -3,7 +3,7 @@ import { prisma } from "@repo/db/client";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
-import { ADMIN_JWT_SECRET } from "../../config";
+import { JWT_SECRET } from "../../config";
 
 const adminRouter: Router = Router();
 
@@ -20,9 +20,10 @@ adminRouter.post(
 
       const totp = generateToken(phoneNumber + "ADMIN");
 
-      const admin = await prisma.admin.upsert({
+      const admin = await prisma.user.upsert({
         where: {
           phoneNumber,
+          role: "ADMIN",
         },
         create: {
           name,
@@ -81,8 +82,8 @@ adminRouter.post(
         return;
       }
 
-      const admin = await prisma.admin.findUnique({
-        where: { phoneNumber },
+      const admin = await prisma.user.findUnique({
+        where: { phoneNumber, role: "ADMIN" },
       });
 
       if (!admin) {
@@ -93,14 +94,14 @@ adminRouter.post(
         return;
       }
 
-      await prisma.admin.update({
+      await prisma.user.update({
         where: { phoneNumber },
         data: { verified: true },
       });
 
       const token = jwt.sign(
-        { id: admin.id, phoneNumber: admin.phoneNumber },
-        ADMIN_JWT_SECRET!
+        { id: admin.id, role: admin.role },
+        JWT_SECRET!
       );
 
       res.status(200).json({
@@ -138,8 +139,8 @@ adminRouter.post(
         return;
       }
 
-      const admin = await prisma.admin.findUnique({
-        where: { phoneNumber },
+      const admin = await prisma.user.findUnique({
+        where: { phoneNumber, role: "ADMIN" },
       });
 
       if (!admin) {
@@ -201,8 +202,8 @@ adminRouter.post(
         return;
       }
 
-      const admin = await prisma.admin.findUnique({
-        where: { phoneNumber },
+      const admin = await prisma.user.findUnique({
+        where: { phoneNumber, role: "ADMIN" },
       });
 
       if (!admin) {
@@ -214,8 +215,8 @@ adminRouter.post(
       }
 
       const token = jwt.sign(
-        { id: admin.id, phoneNumber: admin.phoneNumber },
-        ADMIN_JWT_SECRET!
+        { id: admin.id, role: admin.role },
+        JWT_SECRET!
       );
 
       res.status(200).json({

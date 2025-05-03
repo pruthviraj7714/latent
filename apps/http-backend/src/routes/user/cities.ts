@@ -1,20 +1,16 @@
-import { Request, Response, Router } from "express";
+import { Response, Router } from "express";
 import { prisma } from "@repo/db/client";
-import { userMiddleware } from "../../middlewares/authMiddleware";
+import {
+  AuthenticatedRequest,
+  verifyAuth,
+} from "../../middlewares/authMiddleware";
 
 const cityRouter: Router = Router();
 
-interface UserAuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    phoneNumber: string;
-  };
-}
-
 cityRouter.get(
   "/all",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "USER", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const cities = await prisma.city.findMany({});
       res.status(200).json({
@@ -31,8 +27,8 @@ cityRouter.get(
 
 cityRouter.get(
   "/top",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "USER", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const topCities = await prisma.city.findMany({
         take: 5,

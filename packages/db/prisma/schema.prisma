@@ -18,16 +18,10 @@ model User {
   phoneNumber String    @unique
   name        String
   verified    Boolean   @default(false)
+  role        Role      @default(USER)
   bookings    Booking[]
   payments    Payment[]
-}
-
-model Admin {
-  id          String  @id @default(uuid())
-  phoneNumber String  @unique
-  name        String
-  verified    Boolean @default(false)
-  events      Event[]
+  events      Event[]   @relation("AdminEvents")
 }
 
 model Event {
@@ -50,7 +44,7 @@ model Event {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   adminId        String
-  admin          Admin         @relation(fields: [adminId], references: [id])
+  admin          User          @relation("AdminEvents", fields: [adminId], references: [id])
 }
 
 model Seat {
@@ -121,6 +115,8 @@ enum BookingStatus {
   FAILED
   PENDING
   EXPIRED
+  CANCELLED
+  COMPLETED
 }
 
 enum SeatType {
@@ -142,4 +138,10 @@ enum EventCategory {
   EDUCATION
   WORKSHOP
   PREMIERE
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
 }

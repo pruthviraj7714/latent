@@ -3,16 +3,12 @@ import { prisma } from "@repo/db/client";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
-import { ADMIN_JWT_SECRET } from "../../config";
-import { adminMiddleware } from "../../middlewares/authMiddleware";
 import { updateEventSchema } from "@repo/common/schema";
-
-interface AdminAuthenticatedRequest extends Request {
-  admin?: {
-    id: string;
-    phoneNumber: string;
-  };
-}
+import {
+  AuthenticatedRequest,
+  verifyAuth,
+} from "../../middlewares/authMiddleware";
+import { JWT_SECRET } from "../../config";
 
 const superAdminRouter: Router = Router();
 
@@ -30,19 +26,19 @@ superAdminRouter.post(
         return;
       }
 
-      const admin = await prisma.admin.findUnique({
-        where: { phoneNumber },
+      const admin = await prisma.user.findFirst({
+        where: { phoneNumber, role: "SUPERADMIN" },
       });
 
       if (!admin) {
         res.status(404).json({
           success: false,
-          message: "admin not registered. Please sign up first.",
+          message: "super admin not found with this creds.",
         });
         return;
       }
 
-      const totp = generateToken(phoneNumber + "ADMIN");
+      const totp = generateToken(phoneNumber + "SUPERADMIN");
 
       if (process.env.NODE_ENV !== "development") {
         await sendMessage(`Your login OTP for Latent is ${totp}`, phoneNumber);
@@ -83,7 +79,7 @@ superAdminRouter.post(
         return;
       }
 
-      const isVerified = verifyToken(phoneNumber + "ADMIN", otp);
+      const isVerified = verifyToken(phoneNumber + "SUPERADMIN", otp);
 
       if (!isVerified || isVerified.delta === -1) {
         res.status(401).json({
@@ -93,22 +89,19 @@ superAdminRouter.post(
         return;
       }
 
-      const admin = await prisma.admin.findUnique({
-        where: { phoneNumber },
+      const admin = await prisma.user.findFirst({
+        where: { phoneNumber, role: "SUPERADMIN" },
       });
 
       if (!admin) {
         res.status(404).json({
           success: false,
-          message: "admin not found",
+          message: "super admin not found",
         });
         return;
       }
 
-      const token = jwt.sign(
-        { id: admin.id, phoneNumber: admin.phoneNumber },
-        ADMIN_JWT_SECRET!
-      );
+      const token = jwt.sign({ id: admin.id, role: admin.role }, JWT_SECRET!);
 
       res.status(200).json({
         success: true,
@@ -118,6 +111,7 @@ superAdminRouter.post(
           id: admin.id,
           name: admin.name,
           phoneNumber: admin.phoneNumber,
+          role : admin.role
         },
       });
       return;
@@ -133,8 +127,8 @@ superAdminRouter.post(
 
 superAdminRouter.post(
   "/add-city",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response) => {
+  verifyAuth(["SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { name, state } = req.body;
 
@@ -179,8 +173,8 @@ superAdminRouter.post(
 
 superAdminRouter.get(
   "/events",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response) => {
+  verifyAuth(["SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const events = await prisma.event.findMany({});
 
@@ -199,11 +193,11 @@ superAdminRouter.get(
 
 superAdminRouter.put(
   "/:eventId",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const parsedBody = updateEventSchema.safeParse(req.body);
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
       const eventId = req.params.eventId;
 
       if (!eventId) {

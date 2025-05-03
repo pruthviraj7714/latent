@@ -3,7 +3,7 @@ import { prisma } from "@repo/db/client";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
-import { USER_JWT_SECRET } from "../../config";
+import { JWT_SECRET } from "../../config";
 
 const userRouter: Router = Router();
 
@@ -99,8 +99,8 @@ userRouter.post(
       });
 
       const token = jwt.sign(
-        { id: user.id, phoneNumber: user.phoneNumber },
-        USER_JWT_SECRET!
+        { id: user.id, role: user.role },
+        JWT_SECRET!
       );
 
       res.status(200).json({
@@ -214,8 +214,8 @@ userRouter.post(
       }
 
       const token = jwt.sign(
-        { id: user.id, phoneNumber: user.phoneNumber },
-        USER_JWT_SECRET!
+        { id: user.id, role: user.role },
+        JWT_SECRET!
       );
 
       res.status(200).json({

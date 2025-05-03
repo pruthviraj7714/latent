@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
 import { TicketBookingSchema } from "@repo/common/schema";
-import { userMiddleware } from "../../middlewares/authMiddleware";
 import { prisma } from "@repo/db/client";
 import { client } from "@repo/redis/client";
+import { verifyAuth } from "../../middlewares/authMiddleware";
 
 const bookingRouter: Router = Router();
 
@@ -15,7 +15,7 @@ interface UserAuthenticatedRequest extends Request {
 
 bookingRouter.post(
   "/book-tickets",
-  userMiddleware,
+  verifyAuth(["USER"]),
   async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const { success, data, error } = TicketBookingSchema.safeParse(req.body);
@@ -42,8 +42,9 @@ bookingRouter.post(
 
       if (isAlreadyBooked.length > 0) {
         res.status(400).json({
-          message: "Sorry, some of the selected seats have already been booked. Please choose different seats.",
-          success : false
+          message:
+            "Sorry, some of the selected seats have already been booked. Please choose different seats.",
+          success: false,
         });
         return;
       }
@@ -60,7 +61,7 @@ bookingRouter.post(
               })),
             },
           },
-          amount
+          amount,
         },
       });
 
@@ -81,7 +82,7 @@ bookingRouter.post(
         userId,
         eventId,
         amount,
-        success : true
+        success: true,
       });
     } catch (error) {
       console.error("Error while booking tickets:", error);

@@ -1,16 +1,12 @@
 import { Request, Response, Router } from "express";
 import { prisma } from "@repo/db/client";
-import { userMiddleware } from "../../middlewares/authMiddleware";
 import { addMinPriceToEvents } from "../../utils/helper";
+import {
+  AuthenticatedRequest,
+  verifyAuth,
+} from "../../middlewares/authMiddleware";
 
 const eventRouter: Router = Router();
-
-interface UserAuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    phoneNumber: string;
-  };
-}
 
 enum EventCategory {
   MUSIC = "MUSIC",
@@ -24,7 +20,7 @@ enum EventCategory {
 
 eventRouter.get(
   "/event/:eventId",
-  userMiddleware,
+  verifyAuth(["USER"]),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { eventId } = req.params;
@@ -33,9 +29,9 @@ eventRouter.get(
         where: { id: eventId },
         include: {
           seats: {
-            include : {
-              bookedSeat : true
-            }
+            include: {
+              bookedSeat: true,
+            },
           },
           city: true,
         },
@@ -61,7 +57,7 @@ eventRouter.get(
 
 eventRouter.post(
   "/:eventId/view",
-  userMiddleware,
+  verifyAuth(["USER"]),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { eventId } = req.params;
@@ -90,7 +86,7 @@ eventRouter.post(
 
 eventRouter.get(
   "/featured",
-  userMiddleware,
+  verifyAuth(["USER"]),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const events = await prisma.event.findMany({
@@ -118,8 +114,8 @@ eventRouter.get(
 
 eventRouter.get(
   "/recommended",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const userId = req.user?.id!;
       const bookings = await prisma.booking.findMany({
@@ -163,8 +159,8 @@ eventRouter.get(
 
 eventRouter.get(
   "/popular",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const events = await prisma.event.findMany({
         where: {
@@ -195,8 +191,8 @@ eventRouter.get(
 
 eventRouter.get(
   "/search-event",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const searchQuery = req.query.search;
 
@@ -235,8 +231,8 @@ eventRouter.get(
 
 eventRouter.get(
   "/category/by-category",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const category = req.query.category;
 
@@ -285,8 +281,8 @@ eventRouter.get(
 
 eventRouter.get(
   "/premieres",
-  userMiddleware,
-  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const events = await prisma.event.findMany({
         where: {

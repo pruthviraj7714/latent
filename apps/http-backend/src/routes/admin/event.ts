@@ -1,24 +1,20 @@
 import { Request, Response, Router } from "express";
 import { createEventSchema, updateEventSchema } from "@repo/common/schema";
-import { adminMiddleware } from "../../middlewares/authMiddleware";
 import { prisma } from "@repo/db/client";
+import {
+  AuthenticatedRequest,
+  verifyAuth,
+} from "../../middlewares/authMiddleware";
 
 const adminEventRouter: Router = Router();
 
-interface AdminAuthenticatedRequest extends Request {
-  admin?: {
-    id: string;
-    phoneNumber: string;
-  };
-}
-
 adminEventRouter.post(
   "/create",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const parsedBody = createEventSchema.safeParse(req.body);
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
 
       if (!parsedBody.success) {
         res.status(404).json({
@@ -37,7 +33,7 @@ adminEventRouter.post(
         startTime,
         venue,
         seats,
-        category
+        category,
       } = parsedBody.data;
 
       const txn = await prisma.$transaction(async (tx) => {
@@ -51,7 +47,7 @@ adminEventRouter.post(
             startTime,
             venue,
             adminId,
-            category
+            category,
           },
         });
         await tx.seat.createMany({
@@ -82,11 +78,11 @@ adminEventRouter.post(
 
 adminEventRouter.put(
   "/:eventId",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const parsedBody = updateEventSchema.safeParse(req.body);
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
       const eventId = req.params.eventId;
 
       if (!eventId) {
@@ -185,11 +181,11 @@ adminEventRouter.put(
 
 adminEventRouter.get(
   "/:eventId",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const eventId = req.params.eventId;
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
 
       if (!eventId) {
         res.status(404).json({
@@ -226,11 +222,11 @@ adminEventRouter.get(
 
 adminEventRouter.delete(
   "/:eventId",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN", "SUPERADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const eventId = req.params.eventId;
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
 
       if (!eventId) {
         res.status(404).json({
@@ -267,11 +263,11 @@ adminEventRouter.delete(
 
 adminEventRouter.get(
   "/events",
-  adminMiddleware,
-  async (req: AdminAuthenticatedRequest, res: Response): Promise<void> => {
+  verifyAuth(["ADMIN"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const eventId = req.params.eventId;
-      const adminId = req.admin?.id!;
+      const adminId = req.user?.id!;
 
       if (!eventId) {
         res.status(404).json({

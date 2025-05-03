@@ -19,7 +19,6 @@ async function main() {
   await prisma.event.deleteMany({});
   await prisma.city.deleteMany({});
   await prisma.user.deleteMany({});
-  await prisma.admin.deleteMany({});
 
   console.log("Creating Cities...");
   const cities = await Promise.all([
@@ -57,36 +56,41 @@ async function main() {
 
   console.log("Creating Admins...");
   const admins = await Promise.all([
-    prisma.admin.create({
+    prisma.user.create({
       data: {
+        role: "ADMIN",
         phoneNumber: "9876543210",
         name: "Admin Kumar",
         verified: true,
       },
     }),
-    prisma.admin.create({
+    prisma.user.create({
       data: {
+        role: "ADMIN",
         phoneNumber: "8765432109",
         name: "Priya Admin",
         verified: true,
       },
     }),
-    prisma.admin.create({
+    prisma.user.create({
       data: {
+        role: "ADMIN",
         phoneNumber: "7654321098",
         name: "Raj Administrator",
         verified: true,
       },
     }),
-    prisma.admin.create({
+    prisma.user.create({
       data: {
+        role: "ADMIN",
         phoneNumber: "6543210987",
         name: "Sneha Manager",
         verified: false,
       },
     }),
-    prisma.admin.create({
+    prisma.user.create({
       data: {
+        role: "ADMIN",
         phoneNumber: "5432109876",
         name: "Vikram Director",
         verified: true,
@@ -323,7 +327,7 @@ async function main() {
         userId: users[randomUserIndex]!.id,
         eventId: randomEvent!.id,
         status: bookingStatus,
-        amount : 4000
+        amount: 4000,
       },
     });
 
@@ -345,7 +349,7 @@ async function main() {
           bookingId: booking.id,
           status: paymentStatus,
           eventId: randomEvent.id,
-          amount : 4000
+          amount: 4000,
         },
       });
     }

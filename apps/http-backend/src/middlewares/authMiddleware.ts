@@ -1,118 +1,37 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { prisma } from '@repo/db/client';
-import { ADMIN_JWT_SECRET, USER_JWT_SECRET } from '../config';
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
 
-interface UserAuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
-    phoneNumber: string;
+    role: "USER" | "ADMIN" | "SUPERADMIN";
   };
 }
 
-interface AdminAuthenticatedRequest extends Request {
-  admin?: {
-    id: string;
-    phoneNumber: string;
+export const verifyAuth = (allowedRoles: ("USER" | "ADMIN" | "SUPERADMIN")[]) => {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) : void => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      res.status(401).json({ message: "Unauthorized: No token provided" });
+      return;
+    }
+
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        role: "USER" | "ADMIN" | "SUPERADMIN";
+      };
+
+      if (!allowedRoles.includes(decoded.role)) {
+        res.status(403).json({ message: "Forbidden: Access denied" });
+        return;
+      }
+
+      req.user = decoded;
+      next();
+    } catch (err) {
+      res.status(401).json({ message: "Invalid or expired token" });
+      return;
+    }
   };
-}
-
-export const userMiddleware = async (
-  req: UserAuthenticatedRequest, 
-  res: Response, 
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        success: false,
-        message: 'Authorization denied. No token provided'
-      });
-      return;
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    const decoded = jwt.verify(
-      token!,
-      USER_JWT_SECRET!
-    ) as JwtPayload;
-    
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id }
-    });
-    
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        message: 'User not found or token invalid'
-      });
-      return;
-    }
-    
-    req.user = {
-      id: decoded.id,
-      phoneNumber: decoded.phoneNumber
-    };
-    
-    next();
-  } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Token is not valid or has expired'
-    });
-  }
-};
-
-export const adminMiddleware = async (
-  req: AdminAuthenticatedRequest, 
-  res: Response, 
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({
-        success: false,
-        message: 'Authorization denied. No token provided'
-      });
-      return;
-    }
-
-    const token = authHeader.split(' ')[1];
-    
-    const decoded = jwt.verify(
-      token!,
-      ADMIN_JWT_SECRET!
-    ) as JwtPayload;
-    
-    const user = await prisma.admin.findUnique({
-      where: { id: decoded.id }
-    });
-    
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        message: 'User not found or token invalid'
-      });
-      return;
-    }
-    
-    req.admin = {
-      id: decoded.id,
-      phoneNumber: decoded.phoneNumber
-    };
-    
-    next();
-  } catch (error) {
-    console.error('Auth middleware error:', error);
-    res.status(401).json({
-      success: false,
-      message: 'Token is not valid or has expired'
-    });
-  }
 };
