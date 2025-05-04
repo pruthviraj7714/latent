@@ -115,12 +115,6 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Recommended Events</h2>
-            <Link
-              href="/events"
-              className="text-red-600 flex items-center text-sm font-medium"
-            >
-              See All <ChevronRight className="h-4 w-4" />
-            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {recommendedEvents &&
@@ -225,12 +219,6 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Popular Events</h2>
-            <Link
-              href="/events/popular"
-              className="text-red-600 flex items-center text-sm font-medium"
-            >
-              See All <ChevronRight className="h-4 w-4" />
-            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {isPopularEventLoading ? (
@@ -245,12 +233,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mb-12 bg-red-600 rounded-lg py-12 px-6">
+        <section className="bg-red-600 rounded-lg py-12 w-full">
           <h2 className="text-3xl font-bold text-center text-white mb-10">
             How It Works
           </h2>
 
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 w-full">
             <div className="text-center p-6 bg-white  rounded-lg shadow hover:shadow-md transition w-72">
               <div className="text-red-600  text-5xl mb-4">🎟️</div>
               <h3 className="text-xl font-semibold text-gray-800  mb-2">

@@ -33,7 +33,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import EventCard from "app/components/event-card";
 import MainLayout from "app/components/layouts/main-layout";
-import SeatTypeFilter from "app/components/seat-type-filter";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEventsByCategory } from "@/api/event";
 import { ICity, IEvent } from "@repo/common/schema";
@@ -211,10 +210,6 @@ export default function EventsPage() {
     setSelectedCities((prev) =>
       prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
     );
-  };
-
-  const handleSeatTypeFilter = (types: string[]) => {
-    setSelectedSeatTypes(types);
   };
 
   const clearAllFilters = () => {
@@ -499,64 +494,6 @@ export default function EventsPage() {
                             </label>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-
-                <SeatTypeFilter onChange={handleSeatTypeFilter} />
-
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline">
-                      <SlidersHorizontal className="h-4 w-4 mr-2" />
-                      More Filters
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right">
-                    <SheetHeader>
-                      <SheetTitle>More Filters</SheetTitle>
-                    </SheetHeader>
-                    <div className="py-4 space-y-6">
-                      <div>
-                        <h3 className="text-sm font-medium mb-3">
-                          Price Range
-                        </h3>
-                        <div className="space-y-4">
-                          <div className="flex justify-between">
-                            <span>₹{priceRange[0]}</span>
-                            <span>₹{priceRange[1]}</span>
-                          </div>
-                          <div className="flex gap-4">
-                            <Input
-                              type="number"
-                              min="0"
-                              max={priceRange[1]}
-                              value={priceRange[0]}
-                              onChange={(e) =>
-                                setPriceRange([
-                                  Number(e.target.value),
-                                  priceRange[1],
-                                ])
-                              }
-                              className="w-full"
-                            />
-                            <span>to</span>
-                            <Input
-                              type="number"
-                              min={priceRange[0]}
-                              max="10000"
-                              value={priceRange[1]}
-                              onChange={(e) =>
-                                setPriceRange([
-                                  priceRange[0],
-                                  Number(e.target.value),
-                                ])
-                              }
-                              className="w-full"
-                            />
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </SheetContent>
