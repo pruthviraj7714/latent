@@ -11,8 +11,6 @@ import {
   User,
   LogOut,
   Ticket,
-  Heart,
-  Bell,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import CitySelector from "./city-selector";
 import { useQuery } from "@tanstack/react-query";
 import { IEvent } from "@repo/common/schema";
 import { fetchEventsBySearch } from "@/api/event";
@@ -192,7 +189,7 @@ export default function Header() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <CitySelector />
+            {/* <CitySelector /> */}
 
             {user ? (
               <DropdownMenu>
@@ -210,17 +207,13 @@ export default function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/profile")}>
                     <User className="h-4 w-4 mr-2" />
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/bookings")}>
                     <Ticket className="h-4 w-4 mr-2" />
                     My Bookings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Heart className="h-4 w-4 mr-2" />
-                    Wishlist
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
@@ -398,9 +391,9 @@ export default function Header() {
 
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
-          <div className="py-2 px-4">
+          {/* <div className="py-2 px-4">
             <CitySelector />
-          </div>
+          </div> */}
           <nav className="py-4">
             <ul className="space-y-2">
               {user ? (
@@ -434,24 +427,6 @@ export default function Header() {
                     >
                       <Ticket className="h-5 w-5" />
                       <span>My Bookings</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/wishlist"
-                      className="px-4 py-2 hover:bg-gray-50 flex items-center space-x-3"
-                    >
-                      <Heart className="h-5 w-5" />
-                      <span>Wishlist</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/notifications"
-                      className="px-4 py-2 hover:bg-gray-50 flex items-center space-x-3"
-                    >
-                      <Bell className="h-5 w-5" />
-                      <span>Notifications</span>
                     </Link>
                   </li>
                   <li className="border-t border-gray-100 mt-2 pt-2">

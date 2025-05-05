@@ -158,9 +158,11 @@ export default function HomePage() {
                             <EventCard key={event.id} event={event} />
                           ))
                       ) : (
-                        <p className="text-gray-500">
-                          No events in this category.
+                        <div className="col-span-full flex justify-center items-center py-16">
+                        <p className="text-gray-500 text-center">
+                          No events found in this category.
                         </p>
+                      </div>
                       )}
                     </>
                   )}
