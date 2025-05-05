@@ -4,6 +4,11 @@ import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
 import { JWT_SECRET } from "../../config";
+import {
+  AuthenticatedRequest,
+  verifyAuth,
+} from "../../middlewares/authMiddleware";
+import { UserEditSchema } from "@repo/common/schema";
 
 const userRouter: Router = Router();
 
@@ -98,10 +103,7 @@ userRouter.post(
         data: { verified: true },
       });
 
-      const token = jwt.sign(
-        { id: user.id, role: user.role },
-        JWT_SECRET!
-      );
+      const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET!);
 
       res.status(200).json({
         success: true,
@@ -213,10 +215,7 @@ userRouter.post(
         return;
       }
 
-      const token = jwt.sign(
-        { id: user.id, role: user.role },
-        JWT_SECRET!
-      );
+      const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET!);
 
       res.status(200).json({
         success: true,
@@ -231,6 +230,126 @@ userRouter.post(
       return;
     } catch (error) {
       console.error("Verification error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
+userRouter.get(
+  "/info",
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+
+      const userData = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      const [upcomingEvents, recentBookings] = await Promise.all([
+        prisma.booking.findMany({
+          where: {
+            userId,
+            event: {
+              startTime: {
+                gte: new Date(),
+              },
+            },
+            status: "SUCCESS",
+          },
+          include: {
+            event: true,
+          },
+          take: 2,
+        }),
+
+        prisma.booking.findMany({
+          where: {
+            userId,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            event: {
+              select: {
+                bannerImageUrl: true,
+                category: true,
+                venue: true,
+                views: true,
+                startTime: true,
+                endTime: true,
+                description: true,
+                name: true,
+                createdAt: true,
+                id: true,
+                city: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+          take: 3,
+        }),
+      ]);
+
+      res.status(200).json({
+        success: true,
+        user: {
+          ...userData,
+          upcomingEvents,
+          recentBookings,
+        },
+      });
+      return;
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
+userRouter.put(
+  "/edit",
+  verifyAuth(["USER"]),
+  async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+
+      const parsedBody = UserEditSchema.safeParse(req.body);
+
+      if (!parsedBody.success) {
+        res.status(400).json({
+          message: "Invalid Inputs",
+          error: parsedBody.error.format(),
+        });
+        return;
+      }
+
+      const { name, phoneNumber, categoryPreference } = parsedBody.data;
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name,
+          phoneNumber,
+          categoryPreference,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "User info successfully edited!",
+      });
+      return;
+    } catch (error) {
       res.status(500).json({
         success: false,
         message: "Internal Server Error",
