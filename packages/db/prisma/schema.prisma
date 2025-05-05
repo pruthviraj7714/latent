@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  phoneNumber String    @unique
-  name        String
-  verified    Boolean   @default(false)
-  role        Role      @default(USER)
-  bookings    Booking[]
-  payments    Payment[]
-  events      Event[]   @relation("AdminEvents")
+  id                 String         @id @default(uuid())
+  phoneNumber        String         @unique
+  name               String
+  verified           Boolean        @default(false)
+  role               Role           @default(USER)
+  categoryPreference EventCategory?
+  bookings           Booking[]
+  payments           Payment[]
+  events             Event[]        @relation("AdminEvents")
 }
 
 model Event {
@@ -76,6 +77,7 @@ model Booking {
   status      BookingStatus @default(PENDING)
   userId      String
   amount      Int
+  createdAt   DateTime      @default(now())
   user        User          @relation(fields: [userId], references: [id])
   payment     Payment?
 }

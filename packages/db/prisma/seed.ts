@@ -108,6 +108,7 @@ async function main() {
             phoneNumber: `98${String(i).padStart(8, "0")}`,
             name: `User ${i + 1}`,
             verified: i % 3 === 0,
+            categoryPreference : "MUSIC"
           },
         });
       })
