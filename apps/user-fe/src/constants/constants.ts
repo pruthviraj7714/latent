@@ -7,3 +7,7 @@ export const CATEGORIES = [
   "education",
   "workshop",
 ];
+
+export const CONVENIENCE_FEE = 50;
+
+export const GST = 0.18;
