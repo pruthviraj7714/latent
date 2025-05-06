@@ -1,5 +1,8 @@
 import { Request, Response, Router } from "express";
-import { TicketBookingSchema } from "@repo/common/schema";
+import {
+  SeatAvailabilitySchema,
+  TicketBookingSchema,
+} from "@repo/common/schema";
 import { prisma } from "@repo/db/client";
 import { client } from "@repo/redis/client";
 import { verifyAuth } from "../../middlewares/authMiddleware";
@@ -86,6 +89,61 @@ bookingRouter.post(
       });
     } catch (error) {
       console.error("Error while booking tickets:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
+  }
+);
+
+bookingRouter.post(
+  "/check-seat-availability",
+  verifyAuth(["USER"]),
+  async (req: UserAuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { success, data, error } = SeatAvailabilitySchema.safeParse(
+        req.body
+      );
+      const userId = req.user?.id!;
+
+      if (!success) {
+        res.status(404).json({
+          success: false,
+          message: "Invalid input data.",
+          error: error.format(),
+        });
+        return;
+      }
+
+      const { eventId, seatIds } = data;
+
+      const isAlreadyBooked = await prisma.bookedSeat.findMany({
+        where: {
+          booking: {
+            eventId: eventId,
+          },
+          seatId: {
+            in: seatIds,
+          },
+        },
+      });
+
+      if (isAlreadyBooked.length > 0) {
+        res.status(400).json({
+          message:
+            "Sorry, some of the selected seats have already been booked. Please choose different seats.",
+          available: false,
+        });
+        return;
+      }
+
+      res.status(200).json({
+        message: "Seats are available.",
+        available: true,
+      });
+    } catch (error) {
+      console.error("Error while checking seat availability:", error);
       res.status(500).json({
         success: false,
         message: "Internal Server Error",

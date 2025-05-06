@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const fetchEventDetails = async (eventId : string) => {
+export const fetchEventDetails = async (eventId: string) => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${eventId}`,
     {
@@ -12,7 +12,7 @@ export const fetchEventDetails = async (eventId : string) => {
   return res.data.event;
 };
 
-export const fetchEventsByCategory = async (category : string) => {
+export const fetchEventsByCategory = async (category: string) => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/category/by-category?category=${category}`,
     {
@@ -84,9 +84,22 @@ export const getPremiereEvents = async () => {
   return res.data.events;
 };
 
-export const fetchEventsBySearch = async (searchQuery : string) => {
+export const fetchEventsBySearch = async (searchQuery: string) => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/search-event?search=${searchQuery}`,
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }
+  );
+  return res.data.events;
+};
+
+export const addViewToEvent = async (eventId: string) => {
+  const res = await axios.post(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/${eventId}/view`,
+    {},
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
