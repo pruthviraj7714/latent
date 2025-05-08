@@ -140,6 +140,8 @@ enum EventCategory {
   EDUCATION
   WORKSHOP
   PREMIERE
+  CONCERT
+  MOVIE
 }
 
 enum Role {
