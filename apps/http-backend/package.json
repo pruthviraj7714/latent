@@ -9,10 +9,10 @@
     "dev": "npm run build && npm run start"
   },
   "devDependencies": {
+    "@repo/common": "workspace:*",
     "@repo/db": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "@repo/common" : "workspace:*",
-    "@repo/redis" : "workspace:*"
+    "@repo/redis": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "authenticator": "^1.1.5",
     "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",

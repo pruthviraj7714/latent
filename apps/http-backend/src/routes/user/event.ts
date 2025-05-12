@@ -5,6 +5,7 @@ import {
   AuthenticatedRequest,
   verifyAuth,
 } from "../../middlewares/authMiddleware";
+import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 
 const eventRouter: Router = Router();
 
@@ -126,6 +127,7 @@ eventRouter.get(
       const categoryCount: Partial<Record<EventCategory, number>> = {};
       for (const b of bookings) {
         const cat = b.event.category;
+        //@ts-ignore
         categoryCount[cat] = (categoryCount[cat] || 0) + 1;
       }
 
@@ -234,41 +236,108 @@ eventRouter.get(
   verifyAuth(["USER"]),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const category = req.query.category;
+      const {
+        page = 1,
+        limit = 8,
+        category,
+        cityNames = "",
+        days = "",
+        search = "",
+      } = req.query;
 
       if (!category) {
-        res.status(400).json({
-          message: "Category is missing!",
-        });
+        res.status(400).json({ message: "Category is missing!" });
         return;
       }
 
       const cat = category.toString().toUpperCase();
+      const skip = (Number(page) - 1) * Number(limit);
+      const now = new Date();
 
-      let events;
+      const cityArray = typeof cityNames === "string" && cityNames.length > 0
+        ? cityNames.split(",")
+        : [];
 
-      if (cat === "ALL") {
-        events = await prisma.event.findMany({
-          include: {
-            city: true,
-            seats: true,
+      const daysArray = typeof days === "string" && days.length > 0
+        ? days.split(",").map((d) => d.toLowerCase())
+        : [];
+
+      const startTimeFilters = daysArray.map((day) => {
+        if (day === "today") {
+          return {
+            startTime: {
+              gte: startOfDay(now),
+              lte: endOfDay(now),
+            },
+          };
+        } else if (
+          ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"].includes(day)
+        ) {
+          const targetWeekdayIndex = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"].indexOf(day);
+          const currentWeekdayIndex = now.getDay();
+          const diff = targetWeekdayIndex - currentWeekdayIndex;
+          const targetDate = new Date(now);
+          targetDate.setDate(now.getDate() + diff);
+          return {
+            startTime: {
+              gte: startOfDay(targetDate),
+              lte: endOfDay(targetDate),
+            },
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      const whereClause: any = {
+        ...(cat !== "ALL" && { category: cat }),
+        ...(cityArray.length > 0 && {
+          OR: cityArray.map((name) => ({
+            city: {
+              name: {
+                contains: name,
+                mode: "insensitive",
+              },
+            },
+          })),
+        }),
+        ...(startTimeFilters.length === 1 && startTimeFilters[0]),
+        ...(startTimeFilters.length > 1 && {
+          OR: startTimeFilters,
+        }),
+        ...(search && {
+          name: {
+            contains: search,
+            mode: "insensitive",
           },
-        });
-      } else {
-        events = await prisma.event.findMany({
-          where: {
-            category: cat as EventCategory,
-          },
-          include: {
-            seats: true,
-            city: true,
-          },
-        });
-      }
+        }),
+      };
+
+      const events = await prisma.event.findMany({
+        where: whereClause,
+        include: {
+          city: true,
+          seats: true,
+        },
+        skip,
+        take: Number(limit),
+        orderBy: {
+          startTime: "asc",
+        },
+      });
+
+      const total = await prisma.event.count({
+        where: whereClause,
+      });
 
       const eventsWithMinPrice = addMinPriceToEvents(events);
 
-      res.status(200).json({ events: eventsWithMinPrice });
+      res.status(200).json({
+        success: true,
+        total,
+        events: eventsWithMinPrice,
+        page: Number(page),
+        limit: Number(limit),
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({

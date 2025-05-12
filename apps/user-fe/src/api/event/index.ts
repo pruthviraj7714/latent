@@ -1,5 +1,15 @@
 import axios from "axios";
 
+type FetchEventsParams = {
+  page?: string;
+  limit?: string;
+  category?: string;
+  days?: string[];
+  cityNames?: string[];
+  search?: string;
+};
+
+
 export const fetchEventDetails = async (eventId: string) => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${eventId}`,
@@ -12,16 +22,39 @@ export const fetchEventDetails = async (eventId: string) => {
   return res.data.event;
 };
 
-export const fetchEventsByCategory = async (category: string) => {
+export const fetchEventsByCategory = async ({
+  page = "1",
+  limit = "8",
+  category = "all",
+  days = [],
+  cityNames = [],
+  search = "",
+} : FetchEventsParams) => {
+  const query = new URLSearchParams({
+    category,
+    page,
+    limit,
+    search,
+  });
+
+  if (cityNames.length > 0) {
+    cityNames.forEach((name) => query.append("cityNames", name));
+  }
+
+  if (days.length > 0) {
+    days.forEach((day) => query.append("days", day));
+  }
+
   const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/category/by-category?category=${category}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/category/by-category?${query.toString()}`,
     {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     }
   );
-  return res.data.events;
+
+  return res.data;
 };
 
 export const getFeaturedEvents = async () => {

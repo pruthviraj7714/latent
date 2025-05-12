@@ -7,7 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Filter, MapPin, SlidersHorizontal, X } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  MapPin,
+  X,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -94,15 +101,32 @@ export default function EventsPage() {
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [selectedSeatTypes, setSelectedSeatTypes] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [inputValue, setInputValue] = useState("");
 
   const {
     isPending: isEventsLoading,
     isError: isEventsError,
-    data: events,
+    data,
     error: eventError,
-  } = useQuery<IEvent[]>({
-    queryKey: ["events-category", categoryParam],
-    queryFn: () => fetchEventsByCategory(categoryParam!),
+  } = useQuery<any>({
+    queryKey: [
+      "events-category",
+      categoryParam,
+      currentPage,
+      selectedCities,
+      searchQuery,
+      selectedDates,
+    ],
+    queryFn: () =>
+      fetchEventsByCategory({
+        category: categoryParam!,
+        limit: "8",
+        days: selectedDates,
+        page: String(currentPage),
+        search: searchQuery,
+        cityNames: selectedCities,
+      }),
   });
 
   const {
@@ -115,69 +139,11 @@ export default function EventsPage() {
     queryFn: getAllCities,
   });
 
-    
-
   useEffect(() => {
     if (categoryParam) {
       setCategory(categoryParam);
     }
   }, [categoryParam]);
-
-  const filteredEvents =
-    events &&
-    events.length > 0 &&
-    events.filter((event) => {
-      if (
-        searchQuery &&
-        !event.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        !event.description.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return false;
-      }
-
-      if (
-        selectedCities.length > 0 &&
-        !selectedCities.includes(event?.city?.name!)
-      ) {
-        return false;
-      }
-
-      if (event.minPrice < priceRange[0] || event.minPrice > priceRange[1]) {
-        return false;
-      }
-
-      if (selectedDates.length > 0) {
-        const eventDate = new Date(event.startTime).toLocaleDateString(
-          "en-US",
-          {
-            weekday: "long",
-          }
-        );
-        if (!selectedDates.includes(eventDate)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-  const sortedEvents =
-    filteredEvents &&
-    filteredEvents.length > 0 &&
-    [...filteredEvents].sort((a, b) => {
-      switch (sortBy) {
-        case "date":
-          return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-        case "price-low":
-          return a.minPrice - b.minPrice;
-        case "price-high":
-          return b.minPrice - a.minPrice;
-        case "name":
-          return a.name.localeCompare(b.name);
-        default:
-          return 0;
-      }
-    });
 
   const currentCategory = categoryMetadata[
     category as keyof typeof categoryMetadata
@@ -216,25 +182,26 @@ export default function EventsPage() {
     setSelectedDates([]);
     setSelectedCities([]);
     setSelectedSeatTypes([]);
-    setPriceRange([0, 5000]);
     setSearchQuery("");
   };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchQuery(inputValue);
+    },500)
+
+    return () => clearTimeout(timeout);
+  }, [inputValue])
 
   const hasActiveFilters =
     selectedDates.length > 0 ||
     selectedCities.length > 0 ||
     selectedSeatTypes.length > 0 ||
-    priceRange[0] > 0 ||
-    priceRange[1] < 5000 ||
     searchQuery !== "";
 
-    if(isCitiesLoading) {
-        return (
-            <div>
-                Loading...
-            </div>
-        )
-    }
+  if (isCitiesLoading || isEventsLoading) {
+    return <div className="min-h-screen">Loading...</div>;
+  }
 
   return (
     <MainLayout>
@@ -265,9 +232,10 @@ export default function EventsPage() {
             <div className="w-full md:w-1/3">
               <Input
                 placeholder="Search events..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
                 className="w-full"
+                autoFocus
               />
             </div>
 
@@ -292,7 +260,7 @@ export default function EventsPage() {
                       Refine your event search
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="py-4">
+                  <div className="py-4 px-2">
                     <Accordion type="single" collapsible className="w-full">
                       <AccordionItem value="date">
                         <AccordionTrigger>Date</AccordionTrigger>
@@ -346,46 +314,6 @@ export default function EventsPage() {
                           </div>
                         </AccordionContent>
                       </AccordionItem>
-                      <AccordionItem value="price">
-                        <AccordionTrigger>Price Range</AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-4">
-                            <div className="flex justify-between">
-                              <span>₹{priceRange[0]}</span>
-                              <span>₹{priceRange[1]}</span>
-                            </div>
-                            <div className="flex gap-4">
-                              <Input
-                                type="number"
-                                min="0"
-                                max={priceRange[1]}
-                                value={priceRange[0]}
-                                onChange={(e) =>
-                                  setPriceRange([
-                                    Number(e.target.value),
-                                    priceRange[1],
-                                  ])
-                                }
-                                className="w-full"
-                              />
-                              <span>to</span>
-                              <Input
-                                type="number"
-                                min={priceRange[0]}
-                                max="10000"
-                                value={priceRange[1]}
-                                onChange={(e) =>
-                                  setPriceRange([
-                                    priceRange[0],
-                                    Number(e.target.value),
-                                  ])
-                                }
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
                     </Accordion>
                     <div className="mt-6 space-y-4">
                       <Button
@@ -412,12 +340,6 @@ export default function EventsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="date">Date: Earliest First</SelectItem>
-                    <SelectItem value="price-low">
-                      Price: Low to High
-                    </SelectItem>
-                    <SelectItem value="price-high">
-                      Price: High to Low
-                    </SelectItem>
                     <SelectItem value="name">Name: A to Z</SelectItem>
                   </SelectContent>
                 </Select>
@@ -434,7 +356,7 @@ export default function EventsPage() {
                     <SheetHeader>
                       <SheetTitle>Select Dates</SheetTitle>
                     </SheetHeader>
-                    <div className="py-4">
+                    <div className="py-4 px-2">
                       <div className="grid grid-cols-2 gap-2">
                         {dateOptions.map((date) => (
                           <div
@@ -472,7 +394,7 @@ export default function EventsPage() {
                     <SheetHeader>
                       <SheetTitle>Select Cities</SheetTitle>
                     </SheetHeader>
-                    <div className="py-4">
+                    <div className="py-4 px-2">
                       <div className="grid grid-cols-1 gap-2">
                         {cities.map((city: ICity) => (
                           <div
@@ -480,7 +402,7 @@ export default function EventsPage() {
                             className="flex items-center space-x-2"
                           >
                             <Checkbox
-                              id={`city-desktop-${city}`}
+                              id={`city-desktop-${city.name}`}
                               checked={selectedCities.includes(city.name)}
                               onCheckedChange={() =>
                                 handleCityFilter(city.name)
@@ -583,17 +505,17 @@ export default function EventsPage() {
         <section className="mb-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
-              {sortedEvents && sortedEvents.length}{" "}
-              {sortedEvents && sortedEvents.length === 1 ? "Event" : "Events"}{" "}
+              {data.events && data.events.length}{" "}
+              {data.events && data.events.length === 1 ? "Event" : "Events"}{" "}
               Found
             </h2>
           </div>
         </section>
 
         <section className="mb-12">
-          {sortedEvents && sortedEvents.length > 0 ? (
+          {data.events && data.events.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {sortedEvents.map((event) => (
+              {data.events.map((event : IEvent) => (
                 <EventCard key={event.id} event={event} />
               ))}
             </div>
@@ -620,30 +542,40 @@ export default function EventsPage() {
           )}
         </section>
 
-        {sortedEvents && sortedEvents.length > 0 && (
-          <section className="mb-12 flex justify-center">
+        {Math.ceil(data.total / data.limit) > 1 && (
+          <div className="flex justify-center mt-6">
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" disabled>
-                Previous
-              </Button>
               <Button
                 variant="outline"
+                className="cursor-pointer"
                 size="sm"
-                className="bg-red-600 text-white"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
               >
-                1
+                <ChevronLeft className="h-4 w-4" />
+                <span className="sr-only md:not-sr-only md:ml-2">Previous</span>
               </Button>
-              <Button variant="outline" size="sm">
-                2
-              </Button>
-              <Button variant="outline" size="sm">
-                3
-              </Button>
-              <Button variant="outline" size="sm">
-                Next
+
+              <div className="text-sm">
+                Page {currentPage} of {Math.ceil(data.total / data.limit)}
+              </div>
+
+              <Button
+                variant="outline"
+                className="cursor-pointer"
+                size="sm"
+                onClick={() =>
+                  setCurrentPage((prev) =>
+                    Math.min(prev + 1, Math.ceil(data.total / data.limit))
+                  )
+                }
+                disabled={currentPage === Math.ceil(data.total / data.limit)}
+              >
+                <span className="sr-only md:not-sr-only md:mr-2">Next</span>
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-          </section>
+          </div>
         )}
       </div>
     </MainLayout>
