@@ -9,7 +9,6 @@ type FetchEventsParams = {
   search?: string;
 };
 
-
 export const fetchEventDetails = async (eventId: string) => {
   const res = await axios.get(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/events/event/${eventId}`,

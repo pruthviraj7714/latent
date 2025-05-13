@@ -6,18 +6,21 @@ const paymentRouter: Router = Router();
 
 paymentRouter.post("/webhook", async (req: Request, res: Response) => {
   try {
-    const parsed = CashfreewebhookSchema.safeParse(req.body);
+    console.log("Webhook received body:", JSON.stringify(req.body, null, 2));
+    // const parsed = CashfreewebhookSchema.safeParse(req.body);
 
-    if (!parsed.success) {
-      res.status(400).json({
-        success: false,
-        error: parsed.error,
-      });
-      return;
-    }
+    // console.log(parsed.data);
+    
+    // if (!parsed.success) {
+    //   res.status(400).json({
+    //     success: false,
+    //     error: parsed.error,
+    //   });
+    //   return;
+    // }
 
-    const { customer_id } = parsed.data.data.customer_details;
-    const { order_id, order_amount } = parsed.data.data.order;
+    const { customer_id } = req.body.data.customer_details;
+    const { order_id, order_amount } = req.body.data.order;
 
     const booking = await prisma.booking.findUnique({
       where: {
@@ -58,6 +61,7 @@ paymentRouter.post("/webhook", async (req: Request, res: Response) => {
       success: true,
       message: "Ticket successfully booked",
     });
+    console.log("Ticket successfully booked");
   } catch (error) {
     console.error("Payment webhook error:", error);
     res.status(500).json({
