@@ -6,7 +6,7 @@ LatentBooking is a modern **event ticket booking platform** built with a modular
 
 ## 🧱 Architecture
 
-![Architecture](![Architecture](./public/image.png)) 
+![Architecture](./public/image.png)
 
 ---
 
