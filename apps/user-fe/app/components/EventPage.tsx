@@ -314,7 +314,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-4xl font-bold text-neutral-50 mb-4">
+            <h1 className="text-4xl font-bold mb-4">
               {event.name}
             </h1>
             <div className="flex justify-between w-full">
