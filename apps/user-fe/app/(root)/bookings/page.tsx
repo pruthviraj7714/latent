@@ -54,7 +54,7 @@ export default function BookingsPage() {
   const [inputValue, setInputValue] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [status, setStatus] = useState<IStatus | string>("");
-  const [sortBy, setSortBy] = useState<string>("eventDate");
+  const [sortBy, setSortBy] = useState<string>("bookingDate");
   const [order, setOrder] = useState<string>("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBooking, setSelectedBooking] = useState<IBooking | null>(null);

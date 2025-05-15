@@ -23,7 +23,7 @@ LatentBooking is a modern **event ticket booking platform** built with a modular
 
 ## 🌐 Live Demo
 
-🔗 [Latent Booking Demo](https://youtu.be/5KvjmBqGtZk?si=BGtagXxgJ2Wtomil)  
+🔗 [Latent Booking Demo](https://www.youtube.com/watch?v=vDQEOZ6gNqY)  
 ![Booking Page](./public/image-1.png)
 ![Home Page](./public/image-2.png)
 ![Booking history page](./public/image-3.png)
