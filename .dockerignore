@@ -1,0 +1,37 @@
+# Node modules (never copy them into Docker context)
+**/node_modules
+.pnpm-store
+
+# Local build outputs
+dist
+.next
+out
+build
+coverage
+
+# Logs
+*.log
+logs
+
+# Git-related
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE/editor stuff
+*.swp
+*.swo
+*.bak
+*.tmp
+.vscode
+.idea
+*.DS_Store
+
+# OS junk
+Thumbs.db
+ehthumbs.db
+.DS_Store

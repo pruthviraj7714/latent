@@ -66,6 +66,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
   apps/user-fe:
     dependencies:
@@ -202,6 +205,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
 
   packages/common:
     dependencies:
