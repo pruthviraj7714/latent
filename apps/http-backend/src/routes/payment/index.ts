@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { prisma } from "@repo/db/client";
-import { CashfreewebhookSchema } from "@repo/common/schema";
+import { CashfreewebhookSchema } from "@repo/common";
 
 const paymentRouter: Router = Router();
 

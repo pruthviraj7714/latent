@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { IEvent } from "@repo/common/schema";
+import type { IEvent } from "@repo/common/types";
 
 export default function EventCard({ event }: { event: IEvent }) {
   const formatDate = (date: string | Date) => {

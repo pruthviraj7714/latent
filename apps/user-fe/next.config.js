@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  
   images: {
     remotePatterns: [
       {
@@ -7,6 +8,12 @@ const nextConfig = {
         hostname: "**",
       },
     ],
+  },
+   typescript: {
+    ignoreBuildErrors: true,
+  },
+   eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

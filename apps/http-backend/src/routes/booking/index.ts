@@ -2,9 +2,9 @@ import { Response, Router } from "express";
 import {
   SeatAvailabilitySchema,
   TicketBookingSchema,
-} from "@repo/common/schema";
+} from "@repo/common";
 import { prisma } from "@repo/db/client";
-import { client } from "@repo/redis/client";
+import { client } from "@repo/redis";
 import {
   AuthenticatedRequest,
   verifyAuth,

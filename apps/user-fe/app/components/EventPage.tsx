@@ -6,11 +6,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { TicketCard } from "app/components/ticket-card";
 import { addViewToEvent, fetchEventDetails } from "@/api/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { IEvent, ISeat } from "@repo/common/schema";
+import type { IEvent, ISeat } from "@repo/common/types";
 import { formatEventDateTime } from "@/lib/utils";
 import axios from "axios";
 import { toast } from "sonner";
-import { cashfree } from "@/lib/cashfree";
+import { getCashfreeInstance } from "@/lib/cashfree";
 import { CONVENIENCE_FEE, GST } from "@/constants/constants";
 import { fetchSeatAvailability } from "@/api/booking";
 
@@ -130,7 +130,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
         queryKey: ["event", eventId],
       });
 
-      cashfree.checkout(checkoutOptions);
+      getCashfreeInstance.checkout(checkoutOptions);
     } catch (error: any) {
       console.error("Error during booking/payment", error);
       toast.error(

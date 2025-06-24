@@ -8,7 +8,7 @@ import {
   AuthenticatedRequest,
   verifyAuth,
 } from "../../middlewares/authMiddleware";
-import { UserEditSchema } from "@repo/common/schema";
+import { UserEditSchema } from "@repo/common";
 
 const userRouter: Router = Router();
 

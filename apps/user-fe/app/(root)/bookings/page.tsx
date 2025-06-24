@@ -41,7 +41,7 @@ import {
 import MainLayout from "app/components/layouts/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBookings } from "@/api/booking";
-import { IBooking } from "@repo/common/schema";
+import type { IBooking } from "@repo/common/types";
 import { formatEventDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 

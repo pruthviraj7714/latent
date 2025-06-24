@@ -4,7 +4,7 @@ import {
   SeatType,
   BookingStatus,
   PaymentStatus,
-} from "@prisma/client";
+} from "../src/generated/prisma";
 
 const prisma = new PrismaClient();
 

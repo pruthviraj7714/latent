@@ -12,6 +12,8 @@ COPY ./apps/http-backend ./apps/http-backend
 
 RUN corepack enable && pnpm install --frozen-lockfile
 
+RUN pnpm --filter=db exec prisma generate
+
 EXPOSE 8080
 
 WORKDIR /app/apps/http-backend

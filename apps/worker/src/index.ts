@@ -1,4 +1,4 @@
-import { client } from "@repo/redis/client";
+import { client } from "@repo/redis";
 import { prisma } from "@repo/db/client";
 
 async function main() {

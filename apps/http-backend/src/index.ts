@@ -1,4 +1,5 @@
 import express from "express";
+import type { Request, Response } from "express"
 import cors from "cors";
 import userRouter from "./routes/user";
 import { config } from "dotenv";
@@ -15,6 +16,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+app.use("/", (req : Request, res : Response) => {
+  res.status(200).json({
+    message : "Healthy Server"
+  });
+  return;
+})
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admin", adminRouter);
