@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState, useCallback } from "react";
-import { TicketCard } from "app/components/ticket-card";
+import { TicketCard } from "@/app/components/ticket-card";
 import { addViewToEvent, fetchEventDetails } from "@/api/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { IEvent, ISeat } from "@repo/common/types";

@@ -38,7 +38,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import MainLayout from "app/components/layouts/main-layout";
+import MainLayout from "@/app/components/layouts/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import { fetchBookings } from "@/api/booking";
 import type { IBooking } from "@repo/common/types";

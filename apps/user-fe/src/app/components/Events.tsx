@@ -38,8 +38,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import EventCard from "app/components/event-card";
-import MainLayout from "app/components/layouts/main-layout";
+import EventCard from "@/app/components/event-card";
+import MainLayout from "@/app/components/layouts/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEventsByCategory } from "@/api/event";
 import type { ICity, IEvent } from "@repo/common/types";

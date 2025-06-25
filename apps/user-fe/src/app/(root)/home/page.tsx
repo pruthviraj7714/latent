@@ -17,9 +17,9 @@ import {
   CheckCircle,
   Star,
 } from "lucide-react";
-import EventCarousel from "app/components/event-carousel";
-import EventCard from "app/components/event-card";
-import MainLayout from "app/components/layouts/main-layout";
+import EventCarousel from "@/app/components/event-carousel";
+import EventCard from "@/app/components/event-card";
+import MainLayout from "@/app/components/layouts/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import {
   getFeaturedEvents,
@@ -28,7 +28,7 @@ import {
 } from "@/api/event";
 import type { IEvent } from "@repo/common/types";
 import { CATEGORIES, TESTIMONIALS } from "@/constants/constants";
-import TicketLoader from "app/components/TicketLoader";
+import TicketLoader from "@/app/components/TicketLoader";
 import { toast } from "sonner";
 
 export default function HomePage() {

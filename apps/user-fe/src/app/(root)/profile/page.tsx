@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Settings, LogOut, Edit, Calendar } from "lucide-react";
-import MainLayout from "app/components/layouts/main-layout";
+import MainLayout from "@/app/components/layouts/main-layout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserInfo, EditUserInfo } from "@/api/user";
 import { CATEGORIES } from "@/constants/constants";
