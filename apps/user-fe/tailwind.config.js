@@ -6,6 +6,8 @@ module.exports = {
     "./components/**/*.{ts,tsx}",
     "./pages/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./src/app/**/*.{ts,tsx}",
+    "./src/components/**/*.{ts,tsx}",
     "../../packages/ui/**/*.{ts,tsx}", // if using shared components
   ],
   theme: {
