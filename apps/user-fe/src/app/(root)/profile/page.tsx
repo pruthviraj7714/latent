@@ -29,7 +29,7 @@ import MainLayout from "@/app/components/layouts/main-layout";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchUserInfo, EditUserInfo } from "@/api/user";
 import { CATEGORIES } from "@/constants/constants";
-import { IEditUserInfo, IUserInfo } from "@repo/common/schema";
+import { IEditUserInfo, IUserInfo } from "@repo/common/types";
 import { formatEventDateTime } from "@/lib/utils";
 
 export default function ProfilePage() {

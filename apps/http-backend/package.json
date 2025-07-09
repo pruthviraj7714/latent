@@ -9,11 +9,10 @@
     "dev": "npm run build && npm run start"
   },
   "devDependencies": {
-    "@repo/common": "workspace:*",
-    "@repo/db": "workspace:*",
-    "@repo/redis": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "@repo/typescript-config" : "*",
+    "@repo/common" : "*",
+    "@repo/db" : "*"
   },
   "keywords": [],
   "author": "",

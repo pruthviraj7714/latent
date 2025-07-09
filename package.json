@@ -1,6 +1,10 @@
 {
   "name": "latent",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -13,7 +17,7 @@
     "turbo": "^2.5.1",
     "typescript": "5.8.2"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "npm@11.4.2",
   "engines": {
     "node": ">=18"
   }

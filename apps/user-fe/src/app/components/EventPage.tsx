@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { TicketCard } from "@/app/components/ticket-card";
 import { addViewToEvent, fetchEventDetails } from "@/api/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { IEvent, ISeat } from "@repo/common/types";
+import { IEvent, ISeat } from "@repo/common/types";
 import { formatEventDateTime } from "@/lib/utils";
 import axios from "axios";
 import { toast } from "sonner";
@@ -121,16 +121,17 @@ export default function EventPage({ eventId }: { eventId: string }) {
       });
 
       const data = res2.data;
-      let checkoutOptions = {
-        paymentSessionId: data.payment_session_id,
-        redirectTarget: "_self",
-      };
 
       queryClient.invalidateQueries({
         queryKey: ["event", eventId],
       });
 
-      getCashfreeInstance.checkout(checkoutOptions);
+      const cashfree = await getCashfreeInstance();
+
+      cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self",
+      });
     } catch (error: any) {
       console.error("Error during booking/payment", error);
       toast.error(
@@ -177,7 +178,10 @@ export default function EventPage({ eventId }: { eventId: string }) {
       }
     }
   }
+
   useEffect(() => {
+    if (isProcessingPayment) return;
+
     if (event && selectedSeats.length > 0) {
       const availableSeatIds = new Set(
         event.seats
@@ -314,9 +318,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
           </div>
 
           <div className="flex flex-col">
-            <h1 className="text-4xl font-bold mb-4">
-              {event.name}
-            </h1>
+            <h1 className="text-4xl font-bold mb-4">{event.name}</h1>
             <div className="flex justify-between w-full">
               <div className="flex items-center gap-2 text-neutral-400">
                 <span className="px-3 py-1 rounded-full text-sm text-white bg-red-500 border border-neutral-800">

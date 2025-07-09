@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "prisma generate --schema=./prisma/schema.prisma"
+    "postinstall": "prisma generate --schema=./prisma/schema.prisma",
+    "seed": "ts-node prisma/seed.ts"
   },
   "exports" : {
     "./client" : "./src/index.ts"
@@ -18,6 +19,6 @@
     "prisma": "^6.9.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "*"
   }
 }

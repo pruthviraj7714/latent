@@ -3,7 +3,7 @@ import { prisma } from "@repo/db/client";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
-import { updateEventSchema } from "@repo/common";
+import { updateEventSchema } from "@repo/common/types";
 import {
   AuthenticatedRequest,
   verifyAuth,
