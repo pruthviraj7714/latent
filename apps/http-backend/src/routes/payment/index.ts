@@ -5,11 +5,11 @@ const paymentRouter: Router = Router();
 
 paymentRouter.post("/webhook", async (req: Request, res: Response) => {
   try {
-    console.log("Webhook received body:", JSON.stringify(req.body, null, 2));
+    // console.log("Webhook received body:", JSON.stringify(req.body, null, 2));
     // const parsed = CashfreewebhookSchema.safeParse(req.body);
 
     // console.log(parsed.data);
-    
+
     // if (!parsed.success) {
     //   res.status(400).json({
     //     success: false,
@@ -17,6 +17,8 @@ paymentRouter.post("/webhook", async (req: Request, res: Response) => {
     //   });
     //   return;
     // }
+
+    console.log("webhook hit");
 
     const { customer_id } = req.body.data.customer_details;
     const { order_id, order_amount } = req.body.data.order;
@@ -55,7 +57,6 @@ paymentRouter.post("/webhook", async (req: Request, res: Response) => {
         },
       });
     });
-
     res.status(200).json({
       success: true,
       message: "Ticket successfully booked",
