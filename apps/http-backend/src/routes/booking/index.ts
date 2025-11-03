@@ -4,7 +4,6 @@ import {
   TicketBookingSchema,
 } from "@repo/common/types";
 import { prisma } from "@repo/db/client";
-import  client  from "@repo/redis-client";
 import {
   AuthenticatedRequest,
   verifyAuth,
@@ -31,6 +30,17 @@ bookingRouter.post(
 
       const { eventId, seats, amount } = data;
 
+      if (!seats || seats.length === 0) {
+        res.status(400).json({
+          success: false,
+          message: "Please select at least one seat.",
+        });
+        return;
+      }
+
+      const now = new Date();
+      const lockExpiry = new Date(now.getTime() + 3 * 60 * 1000);
+
       const isAlreadyBooked = await prisma.bookedSeat.findMany({
         where: {
           seatId: {
@@ -48,32 +58,66 @@ bookingRouter.post(
         return;
       }
 
-      const booking = await prisma.booking.create({
-        data: {
-          eventId,
-          userId,
-          status: "PENDING",
-          bookedSeats: {
-            createMany: {
-              data: seats.map((s) => ({
-                seatId: s.id,
-              })),
-            },
+      const lockedSeats = await prisma.seat.findMany({
+        where: {
+          id: {
+            in: seats.map((s) => s.id),
           },
-          amount,
+          lockedUntil: {
+            gt: new Date(),
+          },
         },
       });
 
-      await client.lPush(
-        "event-bookings",
-        JSON.stringify({
-          bookingId: booking.id,
-          eventId,
-          seatIds: seats.map((s) => s.id),
-        })
-      );
+      if (lockedSeats && lockedSeats.length > 0) {
+        res.status(400).json({
+          message: "Some seats are temporarily locked. Please try again later.",
+        });
+        return;
+      }
 
-      console.log("Successfully pushed booking into queue");
+      const seatIds = seats.map((s) => s.id);
+
+      const booking = await prisma.$transaction(async (tx) => {
+        console.log(
+          `SELECT id FROM "Seat" WHERE id IN (${seatIds.map(() => '?').join(',')}) FOR UPDATE`
+        );
+        await tx.$executeRawUnsafe(
+          `SELECT id FROM "Seat" WHERE id IN (${seatIds.map(() => '?').join(',')}) FOR UPDATE`,
+          ...seatIds
+        );
+      
+        const booking = await tx.booking.create({
+          data: {
+            eventId,
+            userId,
+            status: "PENDING",
+            bookedSeats: {
+              createMany: {
+                data: seats.map((s) => ({
+                  seatId: s.id,
+                })),
+              },
+            },
+            amount,
+          },
+        });
+
+        await tx.seat.updateMany({
+          where: {
+            id: {
+              in: seats.map((s) => s.id),
+            },
+          },
+          data: {
+            lockedUntil: lockExpiry,
+          },
+        });
+
+        return booking;
+      });
+
+      console.log("Booking successfully created:", booking)
 
       res.status(201).json({
         message: "Your booking has been successfully initiated.",

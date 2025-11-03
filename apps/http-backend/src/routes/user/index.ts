@@ -50,6 +50,8 @@ userRouter.post(
           message: "User created successfully",
           userId: user.id,
         });
+        console.log("the otp is :", totp);
+        
       }
       return;
     } catch (error) {
@@ -167,6 +169,7 @@ userRouter.post(
           message: "OTP generated successfully",
           userId: user.id,
         });
+        console.log("Otp is :", totp);
       }
       return;
     } catch (error) {

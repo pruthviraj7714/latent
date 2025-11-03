@@ -1,36 +1,4 @@
-import client from "@repo/redis-client";
 import { prisma } from "@repo/db/client";
-
-async function main() {
-  while (true) {
-    const result = await client.brPop("event-bookings", 0);
-    if (!result) continue;
-
-    const data = JSON.parse(result.element as string) as {
-      bookingId: string;
-      eventId: string;
-      seatIds: string[];
-    };
-
-    console.log("Processing booking:", data.bookingId);
-
-    const now = new Date();
-    const lockExpiry = new Date(now.getTime() + 3 * 60 * 1000);
-
-    await prisma.$transaction(async (tx) => {
-      await tx.seat.updateMany({
-        where: {
-          id: { in: data.seatIds },
-        },
-        data: {
-          lockedUntil: lockExpiry,
-        },
-      });
-    });
-
-    console.log(`Seats locked successfully for booking: ${data.bookingId}`);
-  }
-}
 
 async function clearUnProcessedBookings() {
   console.log("Running clearUnProcessedBookings job...");
@@ -93,7 +61,5 @@ async function clearUnProcessedBookings() {
     }
   }
 }
-
-main();
 
 setInterval(clearUnProcessedBookings, 5 * 60 * 1000);
