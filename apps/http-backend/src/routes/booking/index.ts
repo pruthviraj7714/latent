@@ -8,6 +8,7 @@ import {
   AuthenticatedRequest,
   verifyAuth,
 } from "../../middlewares/authMiddleware";
+import { Prisma } from "../../../../../packages/db/src/generated/prisma";
 
 const bookingRouter: Router = Router();
 
@@ -79,13 +80,9 @@ bookingRouter.post(
       const seatIds = seats.map((s) => s.id);
 
       const booking = await prisma.$transaction(async (tx) => {
-        console.log(
-          `SELECT id FROM "Seat" WHERE id IN (${seatIds.map(() => '?').join(',')}) FOR UPDATE`
-        );
-        await tx.$executeRawUnsafe(
-          `SELECT id FROM "Seat" WHERE id IN (${seatIds.map(() => '?').join(',')}) FOR UPDATE`,
-          ...seatIds
-        );
+        await tx.$queryRaw`
+          SELECT id FROM "Seat" WHERE id IN (${Prisma.join(seatIds)}) FOR UPDATE
+        `;
       
         const booking = await tx.booking.create({
           data: {

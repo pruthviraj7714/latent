@@ -105,7 +105,7 @@ export default function EventPage({ eventId }: { eventId: string }) {
         }
       );
 
-      toast.success("Redirecting to Booking page", { position: "top-center" });
+      toast.success("Redirecting to payment page...", { position: "top-center" });
 
       const {
         bookingId,
@@ -127,6 +127,11 @@ export default function EventPage({ eventId }: { eventId: string }) {
       });
 
       const cashfree = await getCashfreeInstance();
+
+      if (!cashfree) {
+        toast.error("Unable to initialize payment gateway");
+        return;
+      }
 
       cashfree.checkout({
         paymentSessionId: data.payment_session_id,
