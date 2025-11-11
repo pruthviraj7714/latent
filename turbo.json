@@ -10,8 +10,7 @@
         "DATABASE_URL",
         "CASHFREE_CLIENT_ID",
         "CASHFREE_CLIENT_SECRET",
-        "CASHFREE_WEBHOOK_URL",
-        "REDIS_URL"
+        "CASHFREE_WEBHOOK_URL"
       ]
     },
     "lint": {

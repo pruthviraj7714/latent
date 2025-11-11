@@ -11,7 +11,6 @@
   "devDependencies": {
     "@repo/common": "*",
     "@repo/db": "*",
-    "@repo/redis-client": "*",
     "@repo/typescript-config": "*",
     "typescript": "^5.8.3"
   },

@@ -1,6 +1,6 @@
 # 🏨 LatentBooking
 
-LatentBooking is a modern **event ticket booking platform** built with a modular architecture. It features a robust backend, a user-friendly frontend, and an asynchronous worker service for handling background tasks like ticket confirmation and notifications.
+LatentBooking is a modern **event ticket booking platform** built with a modular architecture. It features a robust backend, a user-friendly frontend, and an asynchronous worker service for cleanup unprocessed bookings.
 
 ---
 
@@ -15,8 +15,7 @@ LatentBooking is a modern **event ticket booking platform** built with a modular
 - **Monorepo Management**: [Turborepo](https://turbo.build/repo)
 - **Frontend**: [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/)
 - **Backend**: [Express.js](https://expressjs.com/)
-- **Queue**: [Redis](https://redis.io/)
-- **Worker**: Node.js (Worker Service using Redis queue)
+- **Worker**: Node.js (Worker Service for cleanup unprocessed bookings)
 - **Payments**: [Cashfree Payments](https://www.cashfree.com/)
 
 ---
