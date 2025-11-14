@@ -42,7 +42,7 @@ import EventCard from "@/app/components/event-card";
 import MainLayout from "@/app/components/layouts/main-layout";
 import { useQuery } from "@tanstack/react-query";
 import { fetchEventsByCategory } from "@/api/event";
-import type { ICity, IEvent } from "@repo/common/types";
+import type { ICity, IEvent } from "@repo/common";
 import { getAllCities } from "@/api/city";
 
 const categoryMetadata = {

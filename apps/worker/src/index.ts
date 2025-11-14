@@ -1,4 +1,4 @@
-import { prisma } from "@repo/db/client";
+import { prisma } from "@repo/db";
 
 async function clearUnProcessedBookings() {
   console.log("Running clearUnProcessedBookings job...");

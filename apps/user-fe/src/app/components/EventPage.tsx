@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { TicketCard } from "@/app/components/ticket-card";
 import { addViewToEvent, fetchEventDetails } from "@/api/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { IEvent, ISeat } from "@repo/common/types";
+import { IEvent, ISeat } from "@repo/common";
 import { formatEventDateTime } from "@/lib/utils";
 import axios from "axios";
 import { toast } from "sonner";

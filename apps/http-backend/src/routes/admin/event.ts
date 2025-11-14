@@ -1,6 +1,6 @@
-import { Request, Response, Router } from "express";
-import { createEventSchema, updateEventSchema } from "@repo/common/types";
-import { prisma } from "@repo/db/client";
+import { Response, Router } from "express";
+import { createEventSchema, updateEventSchema } from "@repo/common";
+import { prisma } from "@repo/db";
 import {
   AuthenticatedRequest,
   verifyAuth,

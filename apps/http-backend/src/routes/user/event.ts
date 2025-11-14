@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { prisma } from "@repo/db/client";
+import { prisma } from "@repo/db";
 import { addMinPriceToEvents } from "../../utils/helper";
 import {
   AuthenticatedRequest,

@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@repo/db/client";
+import { prisma } from "@repo/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       headers: {
         accept: "application/json",
         "content-type": "application/json",
-        "x-api-version": "2022-09-01",
+        "x-api-version": "2025-01-01",
         "x-client-id": process.env.CASHFREE_CLIENT_ID as string,
         "x-client-secret": process.env.CASHFREE_CLIENT_SECRET as string,
       },

@@ -1,4 +1,4 @@
-import { IEditUserInfo } from "@repo/common/types";
+import { IEditUserInfo } from "@repo/common";
 import axios from "axios";
 
 export const fetchUserInfo = async () => {

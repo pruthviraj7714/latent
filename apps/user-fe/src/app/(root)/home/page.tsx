@@ -26,7 +26,7 @@ import {
   getPremiereEvents,
   getRecommendedEvents,
 } from "@/api/event";
-import type { IEvent } from "@repo/common/types";
+import type { IEvent } from "@repo/common";
 import { CATEGORIES, TESTIMONIALS } from "@/constants/constants";
 import TicketLoader from "@/app/components/TicketLoader";
 import { toast } from "sonner";

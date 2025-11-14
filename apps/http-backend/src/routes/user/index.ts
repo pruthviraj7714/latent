@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { prisma } from "@repo/db/client";
+import { prisma } from "@repo/db";
 import { generateToken, verifyToken } from "authenticator";
 import jwt from "jsonwebtoken";
 import { sendMessage } from "../../utils/twilio";
@@ -8,7 +8,7 @@ import {
   AuthenticatedRequest,
   verifyAuth,
 } from "../../middlewares/authMiddleware";
-import { UserEditSchema } from "@repo/common/types";
+import { UserEditSchema } from "@repo/common";
 
 const userRouter: Router = Router();
 

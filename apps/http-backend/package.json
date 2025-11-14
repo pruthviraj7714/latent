@@ -9,10 +9,10 @@
     "dev": "npm run build && npm run start"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "@repo/typescript-config" : "*",
-    "@repo/common" : "*",
-    "@repo/db" : "*"
+    "@repo/common": "*",
+    "@repo/db": "*",
+    "@repo/typescript-config": "*",
+    "typescript": "^5.8.3"
   },
   "keywords": [],
   "author": "",
