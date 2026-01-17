@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { TicketCard } from "@/app/components/ticket-card";
 import { addViewToEvent, fetchEventDetails } from "@/api/event";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { IEvent, ISeat } from "@repo/common";
+import { IEvent } from "@repo/common";
 import { formatEventDateTime } from "@/lib/utils";
 import axios from "axios";
 import { toast } from "sonner";
@@ -109,15 +109,18 @@ export default function EventPage({ eventId }: { eventId: string }) {
 
       const {
         bookingId,
-        userId,
         eventId: responseEventId,
         amount,
       } = response.data;
-      const res2 = await axios.post("/api/payments/initiate-payment", {
+      const res2 = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/payment/initiate-payment`,{
         bookingId,
-        userId,
         eventId: responseEventId,
         amount,
+      }, {
+        headers : {
+          Authorization : `Bearer ${localStorage.getItem("token")}`
+        }
       });
 
       const data = res2.data;
@@ -184,47 +187,25 @@ export default function EventPage({ eventId }: { eventId: string }) {
     }
   }
 
-  useEffect(() => {
-    if (isProcessingPayment) return;
-
-    if (event && selectedSeats.length > 0) {
-      const availableSeatIds = new Set(
-        event.seats
-          ?.filter((seat: ISeat) => !seat.bookedSeat)
-          .map((seat: ISeat) => seat.id)
-      );
-
-      const updatedSelectedSeats = selectedSeats.filter((seat) =>
-        availableSeatIds.has(seat.id)
-      );
-
-      if (updatedSelectedSeats.length !== selectedSeats.length) {
-        toast.warning("Some of your selected seats are no longer available");
-        setSelectedSeats(updatedSelectedSeats);
-      }
-    }
-  }, [event, selectedSeats]);
-
   const ticketTypes = Array.from(ticketTypesMap.values());
 
   const selectedTicketsCount = selectedSeats.reduce(
     (acc, seat) => {
-      if (!acc[seat.type]) {
-        acc[seat.type] = 0;
-      }
-      acc[seat.type]!++;
+      const key = `${seat.type}_${seat.price}`;
+      acc[key] = (acc[key] || 0) + 1;
       return acc;
     },
     {} as Record<string, number>
   );
+  
 
   const handleTicketSelection = (
     type: string,
     price: number,
     count: number
   ) => {
-    const currentCount = selectedTicketsCount[type] || 0;
     const key = `${type}_${price}`;
+    const currentCount = selectedTicketsCount[key] || 0;
     const availableSeats = availableSeatsMap.get(key) || [];
 
     if (count > currentCount) {
@@ -377,7 +358,9 @@ export default function EventPage({ eventId }: { eventId: string }) {
                   name={ticket.name}
                   price={ticket.price}
                   available={ticket.available}
-                  selected={selectedTicketsCount[ticket.name] || 0}
+                  selected={
+                    selectedTicketsCount[`${ticket.name}_${ticket.price}`] || 0
+                  }
                   onSelect={(count) =>
                     handleTicketSelection(ticket.name, ticket.price, count)
                   }

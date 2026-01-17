@@ -1,8 +1,79 @@
 import { Request, Response, Router } from "express";
 import { prisma } from "@repo/db";
 import { CashfreewebhookSchema } from "@repo/common";
+import { AuthenticatedRequest, verifyAuth } from "../../middlewares/authMiddleware";
 
 const paymentRouter: Router = Router();
+
+
+paymentRouter.post('/initiate-payment', verifyAuth(["USER"]), async (req: AuthenticatedRequest, res : Response) => {
+  try {
+    const userId = req.user?.id!;
+   const { 
+    bookingId,
+    eventId,
+    amount,
+   } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found!",
+      });
+    }
+
+    const response = await fetch("https://sandbox.cashfree.com/pg/orders", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "x-api-version": "2025-01-01",
+        "x-client-id": process.env.CASHFREE_CLIENT_ID as string,
+        "x-client-secret": process.env.CASHFREE_CLIENT_SECRET as string,
+      },
+      body: JSON.stringify({
+        customer_details: {
+          customer_id: user.id,
+          customer_phone: user.phoneNumber,
+          bookingId: bookingId,
+          eventId: eventId,
+          amount: amount,
+        },
+        order_id: bookingId,
+        order_amount: amount,
+        order_currency: "INR",
+        order_meta: {
+          notify_url: process.env.CASHFREE_WEBHOOK_URL,
+          payment_methods: "cc,dc,upi",
+        },
+      }),
+    });
+
+    console.log(response);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Cashfree Error:", data);
+      return res.status(401).json(
+        { message: data.message || "Failed to create order" },
+      );
+    }
+
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error("Error in /initiate-payment:", error);
+    return res.status(500).json(
+      { message: "Something went wrong", error: (error as Error).message },
+    );
+  }
+})
+
 
 paymentRouter.post("/webhook", async (req: Request, res: Response) => {
   try {
